@@ -1,0 +1,1222 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>妊娠黄疸 PBL · 互动解谜游戏 v0</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg:#f8fafc; --panel:#ffffff; --fg:#172033; --muted:#5b6475; --line:#e2e8f0;
+    --accent:#2563eb; --accent-soft:#dbeafe; --warn:#b45309; --warn-soft:#fef3c7;
+    --risk:#b91c1c; --risk-soft:#fee2e2; --ok:#0f766e; --ok-soft:#ccfbf1; --gold:#ca8a04;
+    --shadow:0 1px 2px rgba(15,23,42,.06),0 8px 24px rgba(15,23,42,.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:#0f172a; --panel:#111c33; --fg:#e5e7eb; --muted:#a3adbd; --line:#26334d;
+      --accent:#60a5fa; --accent-soft:#1e3a8a; --warn:#fbbf24; --warn-soft:#4a3410;
+      --risk:#fca5a5; --risk-soft:#4c1d1d; --ok:#5eead4; --ok-soft:#0f3d38; --gold:#facc15;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+    }
+  }
+  * { box-sizing:border-box; }
+  body {
+    margin:0; background:var(--bg); color:var(--fg);
+    font:15px/1.65 ui-sans-serif,system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+  }
+  header {
+    position:sticky; top:0; z-index:20; backdrop-filter:blur(8px);
+    background:color-mix(in srgb,var(--bg) 82%,transparent);
+    border-bottom:1px solid var(--line);
+  }
+  .wrap { max-width:1080px; margin:0 auto; padding:0 20px; }
+  header .wrap { padding-top:14px; padding-bottom:14px; }
+  h1 { font-size:18px; margin:0 0 4px; font-weight:650; letter-spacing:.2px; }
+  .sub { font-size:12.5px; color:var(--muted); }
+  .steps { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+  .step {
+    font-size:12.5px; padding:4px 10px; border-radius:999px; border:1px solid var(--line);
+    color:var(--muted); background:var(--panel); white-space:nowrap;
+  }
+  .step.active { border-color:var(--accent); background:var(--accent-soft); color:var(--accent); font-weight:600; }
+  .step.done { color:var(--ok); border-color:var(--ok); }
+  .step.locked { opacity:.5; }
+  main { padding:24px 0 80px; }
+  section { margin-bottom:30px; }
+  .card {
+    background:var(--panel); border:1px solid var(--line); border-radius:14px;
+    padding:18px 20px; box-shadow:var(--shadow);
+  }
+  h2 { font-size:16px; margin:0 0 12px; display:flex; align-items:center; gap:8px; }
+  h2 .tag { font-size:11px; font-weight:600; color:var(--accent); background:var(--accent-soft);
+    border-radius:999px; padding:2px 9px; }
+  h3 { font-size:13.5px; color:var(--muted); margin:16px 0 8px; font-weight:600;
+    text-transform:none; letter-spacing:.3px; }
+  p { margin:6px 0; }
+  .muted { color:var(--muted); }
+  .lead { font-size:14.5px; }
+  .kv { display:grid; grid-template-columns:auto 1fr; gap:6px 14px; font-size:14px; }
+  .kv dt { color:var(--muted); }
+  .kv dd { margin:0; }
+  .labs { width:100%; border-collapse:collapse; font-size:13.5px; margin-top:6px; }
+  .labs th, .labs td { text-align:left; padding:7px 8px; border-bottom:1px solid var(--line); }
+  .labs th { color:var(--muted); font-weight:600; }
+  .labs td.hi { color:var(--risk); font-weight:600; }
+  .flags { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+  .flag { flex:1 1 220px; border-radius:10px; padding:10px 12px; font-size:13px;
+    border:1px solid var(--line); background:var(--warn-soft); color:var(--warn); }
+  .flag b { display:block; margin-bottom:2px; }
+  .cols { display:grid; grid-template-columns:1.15fr .85fr; gap:22px; align-items:start; }
+  @media (max-width:860px){ .cols { grid-template-columns:1fr; } }
+  .tabs { display:flex; gap:6px; margin-bottom:14px; }
+  .tab { flex:1; padding:9px 12px; border-radius:10px; border:1px solid var(--line);
+    background:var(--panel); color:var(--muted); font-size:13.5px; cursor:pointer; }
+  .tab.active { border-color:var(--accent); color:var(--accent); background:var(--accent-soft); font-weight:600; }
+  .qlist { display:flex; flex-direction:column; gap:8px; }
+  .q {
+    border:1px solid var(--line); border-radius:11px; background:var(--panel);
+    overflow:hidden; transition:border-color .15s;
+  }
+  .q[data-done="1"] { border-color:var(--ok); }
+  .q.hidden-clue[data-done="1"] { border-color:var(--gold); }
+  .q > button {
+    width:100%; text-align:left; border:0; background:transparent; color:inherit;
+    font:inherit; font-size:14px; padding:11px 13px; cursor:pointer;
+    display:flex; gap:10px; align-items:baseline;
+  }
+  .q > button:hover { background:color-mix(in srgb,var(--accent) 7%,transparent); }
+  .q .mark { color:var(--muted); font-size:12px; flex:none; }
+  .q[data-done="1"] .mark { color:var(--ok); }
+  .q.hidden-clue[data-done="1"] .mark { color:var(--gold); }
+  .ans { display:block; padding:0 13px 12px 34px; font-size:13.5px; color:var(--fg); }
+  .qcount { margin-left:auto; font-size:11.5px; color:var(--muted); flex:none; padding-left:10px; }
+  .ans .src { color:var(--muted); font-size:12px; }
+  .ans .clue { margin-top:8px; display:inline-block; font-size:12px; color:var(--accent);
+    background:var(--accent-soft); border-radius:8px; padding:3px 9px; }
+  .ans .clue.gold { color:var(--gold); background:var(--warn-soft); }
+  .ans.more { border-left:3px solid var(--accent); margin-left:34px; padding-left:11px; }
+  /* 化验单提示：可展开的互动解读 */
+  .labs td { vertical-align:top; }
+  .hint { border:1px solid var(--accent); color:var(--accent); background:var(--accent-soft);
+    border-radius:999px; padding:3px 10px; font:inherit; font-size:12.5px; cursor:pointer; text-align:left; }
+  .hint:hover { filter:brightness(1.03); }
+  .hint .caret { margin-left:6px; opacity:.85; display:inline-block; transition:transform .15s; }
+  .hint.open .caret { transform:rotate(90deg); }
+  .hintbody { display:none; margin-top:9px; padding:9px 11px; font-size:12.5px; color:var(--fg);
+    border-left:3px solid var(--accent); background:color-mix(in srgb,var(--accent) 6%,transparent);
+    border-radius:0 8px 8px 0; }
+  .hintbody.show { display:block; }
+  /* ===== Act II+ 新组件 ===== */
+  .checks { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  @media (max-width:720px){ .checks { grid-template-columns:1fr; } }
+  .chk { display:flex; gap:9px; align-items:flex-start; border:1px solid var(--line); border-radius:10px;
+    padding:9px 11px; cursor:pointer; font-size:13.5px; background:var(--panel); }
+  .chk:hover { border-color:var(--accent); }
+  .chk input { margin-top:3px; flex:none; }
+  .chk.on { border-color:var(--accent); background:color-mix(in srgb,var(--accent) 6%,transparent); }
+  .chk.bad { border-color:var(--risk); background:var(--risk-soft); }
+  .chk.miss { border-color:var(--gold); background:var(--warn-soft); }
+  .chk small { display:block; color:var(--muted); font-size:12px; margin-top:2px; }
+  table.grid { width:100%; border-collapse:collapse; font-size:13.5px; }
+  table.grid th, table.grid td { border-bottom:1px solid var(--line); padding:8px; text-align:left; vertical-align:top; }
+  table.grid th { color:var(--muted); font-weight:600; }
+  .pick { display:flex; gap:6px; flex-wrap:wrap; }
+  .pick button { border:1px solid var(--line); background:var(--panel); color:var(--muted);
+    border-radius:8px; padding:4px 10px; font:inherit; font-size:12.5px; cursor:pointer; }
+  .pick button.on { border-color:var(--accent); color:var(--accent); background:var(--accent-soft); }
+  .pick button.ok { border-color:var(--ok); color:var(--ok); background:var(--ok-soft); }
+  .pick button.no { border-color:var(--risk); color:var(--risk); background:var(--risk-soft); }
+  .ending { border:2px solid var(--gold); border-radius:14px; padding:16px 18px; }
+  .ending h3 { margin:0 0 8px; font-size:16px; color:var(--gold); }
+  .ending.bad { border-color:var(--risk); } .ending.bad h3 { color:var(--risk); }
+  .chain { display:flex; flex-direction:column; gap:6px; font-size:13.5px; margin-top:6px; }
+  .chain .lv { border-left:3px solid var(--accent); padding:6px 12px; background:color-mix(in srgb,var(--accent) 6%,transparent); border-radius:0 8px 8px 0; }
+  .badge { display:inline-block; font-size:11.5px; border-radius:6px; padding:2px 7px; margin-left:6px;
+    background:var(--accent-soft); color:var(--accent); }
+  .badge.gold { background:var(--warn-soft); color:var(--gold); }
+  .badge.risk { background:var(--risk-soft); color:var(--risk); }
+  .partbar { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+  /* 模式切换 */
+  .modebar { display:flex; align-items:center; gap:8px; margin-top:10px; flex-wrap:wrap; }
+  .modebtn { border:1px solid var(--line); background:var(--panel); color:var(--muted);
+    border-radius:999px; padding:4px 12px; font:inherit; font-size:12.5px; cursor:pointer; }
+  .modebtn.active { border-color:var(--accent); color:var(--accent); background:var(--accent-soft); font-weight:600; }
+  .modebtn[data-mode="pro"].active { border-color:var(--warn); color:var(--warn); background:var(--warn-soft); }
+  /* Pro 模式：隐藏提示与解析，仅保留基本信息 */
+  body.pro .tuto { display:none !important; }
+  body.pro .hint, body.pro .hintbody { display:none !important; }
+  body.pro .labs th:nth-child(3), body.pro .labs td:nth-child(3) { display:none; }
+  body.pro .ans .clue { display:none; }
+  body.pro .chk small { display:none; }
+  body.pro .q.hidden-clue[data-done="1"] { border-color:var(--ok); }
+  body.pro .q.hidden-clue[data-done="1"] .mark { color:var(--ok); }
+  body.pro #stageSummary { display:none; }
+  .board { position:sticky; top:132px; }
+  .counter { font-size:13px; color:var(--muted); margin-bottom:10px; }
+  .counter b { color:var(--accent); font-size:16px; }
+  .cluebox { min-height:60px; }
+  .group { margin-bottom:12px; }
+  .group .gtitle { font-size:11.5px; color:var(--muted); letter-spacing:.4px; margin-bottom:6px; }
+  .chips { display:flex; flex-wrap:wrap; gap:6px; }
+  .chip { font-size:12.5px; border-radius:8px; padding:4px 9px; border:1px solid var(--line);
+    background:color-mix(in srgb,var(--fg) 4%,transparent); animation:pop .18s ease-out; }
+  .chip.gold { color:var(--gold); border-color:var(--gold); background:var(--warn-soft); }
+  .chip.risk { color:var(--risk); border-color:var(--risk); background:var(--risk-soft); }
+  @keyframes pop { from { transform:scale(.9); opacity:0; } to { transform:scale(1); opacity:1; } }
+  .empty { color:var(--muted); font-size:13px; font-style:italic; }
+  .next { margin-top:18px; border-top:1px dashed var(--line); padding-top:16px; }
+  .btn { display:inline-block; border:1px solid var(--accent); background:var(--accent);
+    color:#fff; border-radius:10px; padding:9px 16px; font:inherit; font-size:14px; cursor:pointer; }
+  .btn.ghost { background:transparent; color:var(--accent); }
+  .btn[disabled] { opacity:.55; cursor:not-allowed; }
+  .note { font-size:12.5px; color:var(--muted); margin-top:8px; }
+  /* 阴性线索：虚线条目 + 低饱和文字 */
+  .q.neg[data-done="1"] { border-color:var(--line); border-style:dashed; }
+  .q.neg[data-done="1"] .mark { color:var(--muted); }
+  .chip.neg { color:var(--muted); border-style:dashed; background:transparent; }
+  .ans .clue.neg { color:var(--muted); background:transparent; border:1px dashed var(--line); }
+  /* 过场判断题 */
+  .opt { display:block; width:100%; text-align:left; border:1px solid var(--line);
+    background:var(--panel); color:inherit; font:inherit; font-size:14px;
+    padding:11px 14px; border-radius:11px; margin-bottom:8px; cursor:pointer; }
+  .opt:hover:not(:disabled) { border-color:var(--accent); background:color-mix(in srgb,var(--accent) 7%,transparent); }
+  .opt.correct { border-color:var(--ok); background:var(--ok-soft); }
+  .opt.wrong { border-color:var(--risk); background:var(--risk-soft); }
+  .opt:disabled { cursor:default; }
+  .fb { font-size:13.5px; margin-top:6px; }
+  .fb.ok { color:var(--ok); }
+  .fb.no { color:var(--risk); }
+  footer { border-top:1px solid var(--line); padding:18px 0 30px; font-size:12px; color:var(--muted); }
+  .hide { display:none; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1>妊娠黄疸 PBL · 互动解谜游戏 <span class="muted" style="font-weight:400">v0</span></h1>
+    <div class="sub">第一人称实习医师视角 ｜ 完整六幕：序章 → 初诊 → 检验影像 → 鉴别 → 危象·ERCP → 复发危象 → 揭秘·结局 ｜ 教学模式 / Pro 模式</div>
+    <div class="steps">
+      <span class="step active" id="stP0">序章</span>
+      <span class="step" id="stA1">① 初诊</span>
+      <span class="step locked" id="stA2">② 检验影像 🔒</span>
+      <span class="step locked" id="stA3">③ 鉴别诊断 🔒</span>
+      <span class="step locked" id="stA4">④ 危象·ERCP 🔒</span>
+      <span class="step locked" id="stA5">⑤ 复发危象 🔒</span>
+      <span class="step locked" id="stA6">⑥ 揭秘·结局 🔒</span>
+    </div>
+    <div class="modebar">
+      <span class="muted" style="font-size:12px">模式</span>
+      <button class="modebtn active" type="button" data-mode="teach">教学模式</button>
+      <button class="modebtn" type="button" data-mode="pro">Pro 模式</button>
+      <span class="muted" id="modetip" style="font-size:12px">含提示与解析</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ================= 序章 ================= -->
+  <section id="prologue">
+    <div class="card">
+      <h2>序章 P0 · 病例登场 <span class="tag">阅读即得</span></h2>
+      <p class="lead">19:40，急诊科的灯光有些刺眼。分诊台推来一张轮椅，上面坐着一位年轻女性——她低着头，眼白和皮肤泛着不自然的黄。</p>
+      <dl class="kv" style="margin-top:12px">
+        <dt>患者</dt><dd>小美（化名），22 岁，女性</dd>
+        <dt>孕周</dt><dd>孕 19 周（孕中期）</dd>
+        <dt>主诉</dt><dd>低热 3 天，皮肤巩膜黄染 3 天；昨起牙龈少量出血；伴腹胀、乏力、头痛</dd>
+      </dl>
+
+      <h3>急诊首诊化验（外院带入）<span class="muted tuto" style="font-weight:400;font-size:12px"> —— 点击「提示」展开解读</span></h3>
+      <table class="labs">
+        <thead><tr><th>项目</th><th>数值</th><th>提示</th></tr></thead>
+        <tbody>
+          <tr><td>ALT / AST</td><td class="hi">82 / 147 U/L</td>
+            <td><button class="hint" type="button">AST &gt; ALT（倒置）<span class="caret">▸</span></button>
+              <div class="hintbody">病毒性肝炎多呈 <b>ALT &gt; AST</b>；AST&gt;ALT（倒置）更见于酒精性肝损、肝窦/微血管损伤与溶血成分（HELLP/TMA），且升高幅度温和，不支持「&gt;10–20×ULN 的急性肝炎」。</div></td></tr>
+          <tr><td>TBil / DBil</td><td class="hi">72 / 32 μmol/L</td>
+            <td><button class="hint" type="button">混合性高胆红素（结合型 ≈ 44%）<span class="caret">▸</span></button>
+              <div class="hintbody">结合型约 44%，介于「溶血性（间接为主）」与「淤胆性（结合为主）」之间 → 提示肝细胞性/混合性；必须结合 <b>尿胆红素、尿胆原、GGT/ALP</b> 才能定位受损环节。</div></td></tr>
+          <tr><td>GGT</td><td class="hi">198 U/L</td>
+            <td><button class="hint" type="button">孕期不生理性升高，是真异常<span class="caret">▸</span></button>
+              <div class="hintbody">GGT 不像 ALP 那样随胎盘同工酶升高，故 198 是可靠异常；明显升高支持<b>胆汁淤积成分</b>。ICP 的 GGT 多正常或轻度升高，故不太像 ICP。</div></td></tr>
+          <tr><td>ALP</td><td class="hi">220 U/L</td>
+            <td><button class="hint" type="button">需鉴别胎盘同工酶生理性升高<span class="caret">▸</span></button>
+              <div class="hintbody">孕中晚期 ALP 可因胎盘同工酶而生理性升高，单独看参考价值有限；需联合 <b>GGT</b> 判定是否为真性淤胆。</div></td></tr>
+          <tr><td>LDH</td><td class="hi">781.5 U/L</td>
+            <td><button class="hint" type="button">显著升高 —— 溶血 / 微血管病线索<span class="caret">▸</span></button>
+              <div class="hintbody">LDH 显著升高提示溶血或组织坏死；与 <b>AST&gt;ALT、牙龈出血（血小板？）</b> 合并，指向<b>微血管病性溶血（HELLP / TTP）</b>。</div></td></tr>
+          <tr><td>Cr</td><td>99 μmol/L（59–104）</td>
+            <td><button class="hint" type="button">目前肾功能尚可<span class="caret">▸</span></button>
+              <div class="hintbody">肾功能暂正常，但「溶血 + 血小板减少 + 肾损」是 TMA 的典型三联，必须<b>动态复查 Cr 与尿蛋白</b>。</div></td></tr>
+        </tbody>
+      </table>
+
+      <div class="flags">
+        <div class="flag"><b>危险信号 ①</b>溶血 / 组织坏死：LDH 高、AST&gt;ALT</div>
+        <div class="flag"><b>危险信号 ②</b>胆汁淤积：GGT、ALP 明显升高</div>
+        <div class="flag"><b>危险信号 ③</b>出血倾向：牙龈出血 —— 血小板或凝血异常？</div>
+      </div>
+
+      <p class="note tuto">题眼：<b>孕中期</b>出现「淤胆 + 溶血 + 出血 + 头痛」的组合，别只想「病毒性肝炎」，要优先摆出<b>妊娠特异性肝病</b>。</p>
+
+      <div class="next">
+        <button class="btn" id="toAct1">进入第一幕 · 初诊 →</button>
+        <div class="note">目标：自主选择问什么、查什么，采集线索。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 第一幕 ================= -->
+  <section id="act1" class="hide">
+    <div class="card" style="margin-bottom:20px">
+      <h2>第一幕 Act I · 初诊（问诊 + 查体） <span class="tag">交互采集</span></h2>
+      <p class="lead muted">点击下方条目进行「问诊」或「查体」，答案与线索会实时写入右侧证据板。<span class="tuto"><span style="color:var(--gold)">金色边条</span>代表被问到/查到的隐藏线索（教师埋的「该问却没问」的坑）。</span></p>
+    </div>
+
+    <div class="cols">
+      <!-- 左：交互区 -->
+      <div class="card">
+        <div class="tabs">
+          <button class="tab active" data-tab="ask">问诊</button>
+          <button class="tab" data-tab="exam">查体</button>
+        </div>
+
+        <div id="pane-ask" class="qlist"></div>
+        <div id="pane-exam" class="qlist hide"></div>
+      </div>
+
+      <!-- 右：证据板 -->
+      <div class="board card">
+        <h2 style="font-size:14.5px">证据板 · 已采集线索</h2>
+        <div class="counter">已采集 <b id="cnt">0</b> / <span id="total">0</span> 条</div>
+        <div class="cluebox" id="board"></div>
+        <div id="stageSummary" class="hide" style="margin-top:14px;border-top:1px dashed var(--line);padding-top:14px">
+          <h3 style="margin-top:0">第一幕小结</h3>
+          <ul style="margin:0;padding-left:18px;font-size:13.5px">
+            <li>血压偏高 + 下肢水肿 → 必须筛<b>子痫前期/HELLP</b>（不能只盯肝）。</li>
+            <li>牙龈出血 → <b>血小板</b>是生死线，下一步必须查（老师「死穴」之一）。</li>
+            <li>混合性黄疸 + LDH 极高 + AST&gt;ALT → 指向<b>微血管病 / 妊娠特异性肝病</b>。</li>
+            <li>追问挖出「血小板低 + 光敏 + 口腔溃疡 + 脱发 + 复发性流产」→ <b>自身免疫病</b>的暗线浮出。</li>
+            <li>宫高相符但<b>未闻及胎心（疑胎死宫内）</b>→ 需超声确认，影响后续处置与 DIC 风险。</li>
+          </ul>
+          <div class="note">下一幕（Act II 检验·影像）将围绕「三黄疸归类 + 胆道梗阻证据」展开。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 过场判断题 → 下一 Part ================= -->
+  <section id="gate" class="hide" style="margin-top:22px">
+    <div class="card">
+      <h2>过场判断 · 进入下一 Part <span class="tag">单选</span></h2>
+      <p class="lead">阳性线索与阴性线索都已摆在证据板上。此刻（初诊结束）最恰当的下一步是——</p>
+      <div id="opts"></div>
+      <div id="fb" class="fb"></div>
+      <div class="note" id="gateHint">选错可重来；答对即解锁 <b>Part 2 · 检验·影像</b>。</div>
+    </div>
+  </section>
+
+  <!-- ================= 第二幕 · 检验影像 ================= -->
+  <section id="act2" class="hide" style="margin-top:22px">
+    <div class="card" style="margin-bottom:18px">
+      <h2>第二幕 Act II · 检验 · 影像 <span class="tag">开单 + 判读</span></h2>
+      <p class="lead muted">黄疸在转诊途中持续加深，并新出现<b>右上腹痛（NRS 5）、发热（Tmax 39℃）、寒战</b>。先决定开哪些检查——每项都有成本／时间／辐射代价。</p>
+    </div>
+    <div class="card" style="margin-bottom:18px">
+      <h3 style="margin-top:0">A · 开单（勾选必要检查，再提交）</h3>
+      <div class="checks" id="orders"></div>
+      <button class="btn" id="submitOrders" style="margin-top:12px">提交开单</button>
+      <div id="orderFb" class="fb"></div>
+    </div>
+    <div class="card hide" id="labCard" style="margin-bottom:18px">
+      <h3 style="margin-top:0">B · 结果回读：急诊（协和）vs 首诊（当地）</h3>
+      <table class="labs">
+        <thead><tr><th>项目</th><th>首诊 → 急诊</th><th>提示</th></tr></thead>
+        <tbody>
+          <tr><td>TBil / DBil</td><td class="hi">72/32（结合≈44%）→ 400.9/320.2（结合≈80%）</td>
+            <td><button class="hint" type="button">混合性 → 以结合为主<span class="caret">▸</span></button>
+              <div class="hintbody">由「混合性」转为「以结合（直接）为主」→ 强烈提示<b>胆汁淤积 / 肝外梗阻</b>。</div></td></tr>
+          <tr><td>ALT / AST</td><td class="hi">82/147 → 177/155</td>
+            <td><button class="hint" type="button">肝损轻中度加重<span class="caret">▸</span></button>
+              <div class="hintbody">未达暴发性肝炎（&gt;10×ULN）水平，可能继发于梗阻 / 胆管炎。</div></td></tr>
+          <tr><td>GGT / ALP</td><td class="hi">198/220 → 230/250</td><td>胆汁淤积持续加重</td></tr>
+          <tr><td>LDH</td><td class="hi">781.5 → 915 U/L</td><td>溶血 / 组织坏死持续</td></tr>
+          <tr><td>HGB</td><td class="hi">— → 70 g/L</td><td>中重度贫血（正细胞正色素）</td></tr>
+          <tr><td>PLT</td><td class="hi">— → 18×10⁹/L</td>
+            <td><button class="hint" type="button">重度血小板减少（出血高危）<span class="caret">▸</span></button>
+              <div class="hintbody">与瘀点、牙龈渗血相符；有创操作前需纠正（目标常 ≥50×10⁹/L）。</div></td></tr>
+          <tr><td>WBC / NEUT / hsCRP</td><td class="hi">— → 14.67 / 80% / 20.6 mg/L ↑</td><td>细菌感染 / 炎症</td></tr>
+          <tr><td>AMY / LIP</td><td class="hi">— → 188 / 288 U/L ↑</td><td>警惕胆源性胰腺炎</td></tr>
+          <tr><td>Cr</td><td>99 → 111 μmol/L ↑</td><td>轻度 AKI（肾前性 / 脓毒症 / 溶血）</td></tr>
+          <tr><td>PT / APTT / Fbg / D-Dimer</td><td>— → 13 / 32 s（正常）· 4.27 g/L ↑ · 4.14 mg/L ↑</td><td>凝血尚可；高凝 / 纤溶激活线索</td></tr>
+          <tr><td>ALB</td><td>— → 38 g/L</td><td>肝合成功能目前尚可</td></tr>
+        </tbody>
+      </table>
+      <p class="note" style="margin-top:12px">MRCP：肝内外胆管扩张、胆总管下段局限性狭窄、近端胆管扩张，胆管内异常低信号影 → <b>胆道梗阻</b>（位于胆总管下段；充盈缺损最常见为结石）。</p>
+    </div>
+    <div class="card hide" id="p1Card" style="margin-bottom:18px">
+      <h3 style="margin-top:0">C · 谜题 P1 · 归位三类黄疸 <span class="badge">核心谜题</span></h3>
+      <p class="muted">把每条证据归到「溶血性 / 肝细胞性 / 胆汁淤积性」，再判断整体黄疸属于哪一类。</p>
+      <div id="p1"></div>
+      <button class="btn" id="submitP1" style="margin-top:12px">提交归类</button>
+      <div id="p1Fb" class="fb"></div>
+      <div class="hide" id="p1final" style="margin-top:14px"></div>
+    </div>
+    <div class="card hide" id="gate2Card">
+      <h2 style="font-size:15px">过场判断 · 进入第三幕 <span class="tag">单选</span></h2>
+      <div id="opts2"></div>
+      <div id="fb2" class="fb"></div>
+    </div>
+  </section>
+
+  <!-- ================= 第三幕 · 鉴别 ================= -->
+  <section id="act3" class="hide" style="margin-top:22px">
+    <div class="card" style="margin-bottom:18px">
+      <h2>第三幕 Act III · 鉴别诊断 <span class="tag">排除法</span></h2>
+      <p class="lead muted">面对「孕中期 + 黄疸 + 发热 + 出血 + 头痛」，把妊娠相关肝病逐一排开——判断每条对本例是「支持 / 部分符合 / 不支持」。</p>
+    </div>
+    <div class="card" style="margin-bottom:18px">
+      <h3 style="margin-top:0">A · 动态鉴别表</h3>
+      <table class="grid"><thead><tr><th style="width:150px">疾病</th><th style="width:250px">本例判断</th><th>要点（提交后揭示）</th></tr></thead><tbody id="diffBody"></tbody></table>
+      <button class="btn" id="submitDiff" style="margin-top:12px">提交鉴别</button>
+      <div id="diffFb" class="fb"></div>
+    </div>
+    <div class="card hide" id="dirCard">
+      <h2 style="font-size:15px">B · 初诊方向 <span class="tag">决策</span></h2>
+      <p class="muted">综合全部证据，你此刻的初诊方向是——</p>
+      <div id="dirOpts"></div>
+      <div id="dirFb" class="fb"></div>
+    </div>
+    <div class="card hide" id="gate3Card" style="margin-top:18px">
+      <h2 style="font-size:15px">过场判断 · 进入第四幕 <span class="tag">单选</span></h2>
+      <div id="opts3"></div>
+      <div id="fb3" class="fb"></div>
+    </div>
+  </section>
+
+  <!-- ================= 第四幕 · ERCP ================= -->
+  <section id="act4" class="hide" style="margin-top:22px">
+    <div class="card" style="margin-bottom:18px">
+      <h2>第四幕 Act IV · 危象 · ERCP 抉择 <span class="tag">抉择 + 知情同意</span></h2>
+      <p class="lead muted">转诊后病情急转：T 39℃、HR 120、BP 150/90；皮肤巩膜重度黄染，前胸及前臂散在瘀点，右上腹轻压痛。<b>胆道梗阻合并严重感染</b>——MDT 决定是否 ERCP。</p>
+    </div>
+    <div class="card" style="margin-bottom:18px">
+      <h3 style="margin-top:0">A · 识别 Charcot 三联征（选出 3 项）</h3>
+      <div class="checks" id="charcot"></div>
+      <button class="btn" id="submitCharcot" style="margin-top:12px">提交</button>
+      <div id="charcotFb" class="fb"></div>
+    </div>
+    <div class="card hide" id="ercpCard" style="margin-bottom:18px">
+      <h3 style="margin-top:0">B · ERCP 决策</h3>
+      <div id="ercpOpts"></div>
+      <div id="ercpFb" class="fb"></div>
+    </div>
+    <div class="card hide" id="consentCard">
+      <h3 style="margin-top:0">C · 知情同意 / 沟通（多选）</h3>
+      <div class="checks" id="consent"></div>
+      <button class="btn" id="submitConsent" style="margin-top:12px">提交沟通要点</button>
+      <div id="consentFb" class="fb"></div>
+    </div>
+    <div class="card hide" id="gate4Card" style="margin-top:18px">
+      <h2 style="font-size:15px">过场判断 · 进入第五幕 <span class="tag">单选</span></h2>
+      <div id="opts4"></div>
+      <div id="fb4" class="fb"></div>
+    </div>
+  </section>
+
+  <!-- ================= 第五幕 · TMA/iTTP ================= -->
+  <section id="act5" class="hide" style="margin-top:22px">
+    <div class="card" style="margin-bottom:18px">
+      <h2>第五幕 Act V · 复发危象 · TMA → iTTP <span class="tag">核心推理</span></h2>
+      <p class="lead muted">ERCP 术中见<b>黑胆汁</b>，胆管下段狭窄 + 可疑小充盈缺损，留置胆管 + 胰管支架引流；术后转 ICU。产科超声：<b>未见胎心（胎死宫内）</b>。</p>
+    </div>
+    <div class="card" style="margin-bottom:18px">
+      <h3 style="margin-top:0">A · 谜题 P3 · 分离现象（逐项判「改善 / 不改善」） <span class="badge">核心谜题</span></h3>
+      <table class="grid"><thead><tr><th>指标（术前 → 术后）</th><th style="width:190px">判断</th></tr></thead><tbody id="sepBody"></tbody></table>
+      <button class="btn" id="submitSep" style="margin-top:12px">提交</button>
+      <div id="sepFb" class="fb"></div>
+    </div>
+    <div class="card hide" id="tmaCard" style="margin-bottom:18px">
+      <h3 style="margin-top:0">B · 这些指标指向什么诊断？ <span class="tag">单选</span></h3>
+      <div id="tmaOpts"></div>
+      <div id="tmaFb" class="fb"></div>
+    </div>
+    <div class="card hide" id="adamtsCard" style="margin-bottom:18px">
+      <h3 style="margin-top:0">C · 谜题 P4 · 分水岭：下一步查什么？ <span class="badge gold">分水岭</span></h3>
+      <div id="adamtsOpts"></div>
+      <div id="adamtsFb" class="fb"></div>
+      <div class="hide" id="adamtsRes" style="margin-top:12px"></div>
+    </div>
+    <div class="card hide" id="pexCard" style="margin-bottom:18px">
+      <h3 style="margin-top:0">D · 治疗决策</h3>
+      <div id="pexOpts"></div>
+      <div id="pexFb" class="fb"></div>
+    </div>
+    <div class="card hide" id="gate5Card">
+      <h2 style="font-size:15px">过场判断 · 进入第六幕 <span class="tag">单选</span></h2>
+      <div id="opts5"></div>
+      <div id="fb5" class="fb"></div>
+    </div>
+  </section>
+
+  <!-- ================= 第六幕 · 结局 ================= -->
+  <section id="act6" class="hide" style="margin-top:22px">
+    <div class="card" style="margin-bottom:18px">
+      <h2>第六幕 Act VI · 揭秘 · 一元论与结局 <span class="tag">收束</span></h2>
+      <p class="lead muted">引产清宫 + 血浆置换 + 激素 + 利妥昔单抗 → iTTP 缓解。而真正让医生「心里有了方向」的，是那串细节与自身抗体谱：<b>ANA 1:1280、抗 dsDNA ↑、抗 Sm/RNP +++、C3/C4↓、LA 2.2、24 h 尿蛋白 1.8 g</b>。</p>
+    </div>
+    <div class="card" style="margin-bottom:18px">
+      <h3 style="margin-top:0">A · 终局推理：一元论</h3>
+      <p class="muted">把溶血性黄疸与梗阻性黄疸归到同一个根因——它是？</p>
+      <div id="uniOpts"></div>
+      <div id="uniFb" class="fb"></div>
+    </div>
+    <div class="card hide" id="endingCard" style="margin-bottom:18px"></div>
+    <div class="card hide" id="reviewCard">
+      <h3 style="margin-top:0">复盘 · 推理链与诊断清单</h3>
+      <div class="chain">
+        <div class="lv">第 1 层 · 孕中期黄疸 / 发热 / 出血 → 筛三类黄疸（混合性 + 溶血成分）</div>
+        <div class="lv">第 2 层 · 转诊急诊：Charcot 三联征 + MRCP 胆道梗阻 → 急性胆管炎</div>
+        <div class="lv">第 3 层 · ERCP 减压后胆红素↓，但溶血 / 血小板 / 肾损 / 发热头痛「不改善」→ 识别 TMA</div>
+        <div class="lv">第 4 层 · ADAMTS13 &lt;5% + 抑制物阳性 → 确诊 iTTP</div>
+        <div class="lv">第 5 层 · 复发性流产 + 光敏 / 口腔溃疡 / 脱发 + 自身抗体谱 → 根因 SLE（+ 继发 APS）</div>
+      </div>
+      <h3>诊断清单（最终）</h3>
+      <table class="grid"><thead><tr><th style="width:210px">诊断</th><th>关键依据</th></tr></thead><tbody>
+        <tr><td><b>系统性红斑狼疮（SLE）</b>·根病/主干</td><td>ANA 1:1280、抗 ds-DNA ↑、抗 Sm/RNP/rRNP +++、C3/C4↓、IgG 26 g/L ↑、光敏、口腔溃疡、脱发</td></tr>
+        <tr><td>免疫性 TTP（iTTP）</td><td>ADAMTS13 &lt;5% + 抑制物阳性；MAHA + 血小板↓ + 发热 + 头痛 + 肾损</td></tr>
+        <tr><td>继发性抗磷脂综合征（APS）</td><td>LA 2.2 阳性；解释复发性流产 / 胎死宫内</td></tr>
+        <tr><td>狼疮肾炎</td><td>24 h 尿蛋白 1.8 g（≥1.0 g/24h 有肾活检指征）</td></tr>
+        <tr><td>胆道梗阻 / 急性胆管炎</td><td>MRCP 胆管扩张 / 下段梗阻；ERCP 黑胆汁 + 支架引流；慢性溶血 → 色素性结石</td></tr>
+        <tr><td>胎死宫内（第 3 次妊娠丢失）</td><td>产科超声无胎心；既往孕 7、8 周流产 2 次</td></tr>
+      </tbody></table>
+      <p class="note">根病是 SLE：它产生抗 ADAMTS13 抗体（→ iTTP）、抗磷脂抗体（→ APS → 复发性流产），免疫复合物沉积（→ 狼疮肾炎），慢性溶血又通过色素性结石堵了胆道——「一源多响」。</p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="wrap">
+  妊娠黄疸 PBL · 互动解谜游戏 <b>v0</b>（2026-09-25）｜依据：<b>妊娠黄疸PBL.md</b>、<b>PBL-黄疸-分析提纲与总结</b>（五段病情更新）、<b>妊娠黄疸PBL-互动解谜游戏-项目预估与呈现形式.md</b>｜内容仅供教学演示，具体诊断与处理以临床指南及带教老师意见为准。
+</footer>
+
+<script>
+const QUESTIONS = [
+  // ---- 现病史 ----
+  { g:"现病史", id:"q1", q:"黄疸的起病时间与演变？", a:"3 天前先出现低热（最高 37.5℃），随后家人发现双眼巩膜及皮肤发黄，且一日比一日重。", clue:"黄疸进行性加重（3 天）" },
+  { g:"现病史", id:"q2", q:"有没有皮肤瘙痒？", a:"患者说「不痒」。", clue:"无明显瘙痒 → ICP 可能性偏低" },
+  { g:"现病史", id:"q3", q:"小便颜色和尿量？", a:"尿色深，像浓茶；这两天尿量比平时少。", clue:"尿色深（浓茶样）· 尿量减少" },
+  { g:"现病史", id:"q4", q:"大便颜色？", a:"家属补充：「大便颜色比以前浅了。」", clue:"大便颜色变浅" },
+  { g:"现病史", id:"q5", q:"有没有腹胀、腹痛？", a:"上腹/右上腹发胀、隐痛，不明显绞痛；胃口差，乏力。", clue:"上腹/右上腹隐痛 · 食欲差" },
+  { g:"现病史", id:"q6", q:"除了牙龈，别的地方有没有出血？", a:"仅刷牙时牙龈渗血，无鼻出血，无明显皮肤瘀斑（供述）。", clue:"出血以牙龈为主" },
+  { g:"现病史", id:"q7", q:"头痛的情况？有没有视物模糊、抽搐？", a:"头痛明显；自觉视物略模糊；无抽搐、无意识丧失。", clue:"头痛 + 视物模糊（警惕 CNS / 血压）", risk:true },
+
+  // ---- 现病史 · 阴性排查（未提及的可能性，逐一问明为阴性/弱阳性）----
+  { g:"现病史 · 阴性排查", id:"n1", neg:true, q:"有无阴道流血、规律宫缩？", a:"无阴道流血，无规律宫缩。", clue:"（阴性）无阴道流血 / 宫缩" },
+  { g:"现病史 · 阴性排查", id:"n2", neg:true, q:"有无呕血、黑便、血尿？", a:"均否认。", clue:"（阴性）无消化道 / 泌尿系出血" },
+  { g:"现病史 · 阴性排查", id:"n3", neg:true, q:"有无寒战、高热？", a:"否认寒战，体温始终在 37.5–37.6℃。", clue:"（阴性）无寒战高热（仅低热）" },
+  { g:"现病史 · 阴性排查", id:"n4", neg:true, q:"有无胸痛、气促、咳嗽？", a:"否认。", clue:"（阴性）无胸痛 / 气促" },
+  { g:"现病史 · 阴性排查", id:"n5", neg:true, risk:true, q:"胎动有无变化？", a:"自觉胎动较前明显减少，近一天几乎没感觉到。", clue:"胎动明显减少 / 近一天未觉（警惕胎死宫内）" },
+
+  // ---- 既往史（含隐藏坑 / 需追问）----
+  { g:"既往史", id:"q8", hidden:true, q:"以前查血有没有发现过异常（比如血小板）？", stages:[
+      { a:"家属想了想：「前年体检……好像说过血小板有点低，当时没在意，也没复查。」" },
+      { a:"再追问「低到多少？后来查过吗？」—— 家属摇头：「记不清了，后来没再查过。」", clue:"既往血小板偏低且未随访（慢性血小板减少？）" } ] },
+  { g:"既往史 · 系统回顾", id:"q9", hidden:true, q:"口腔溃疡 / 日晒后皮疹 / 脱发 / 关节痛？", stages:[
+      { a:"她先是摇头：「没有。」" },
+      { a:"逐项追问后：反复口腔溃疡；日晒后面部起过红疹；近半年脱发增多；偶有手指关节痛。", clue:"光敏 + 口腔溃疡 + 脱发 + 关节痛" } ] },
+  { g:"既往史", id:"q10", q:"肝炎、输血、手术史？近期用药？", a:"否认肝炎、输血、手术史；近期未服特殊药物（追问抗板药亦否认）。", clue:"否认肝炎/输血/特殊用药史" },
+
+  // ---- 既往史 · 阴性排查 ----
+  { g:"既往史 · 阴性排查", id:"n6", neg:true, q:"有无关节红肿、晨僵、口干眼干？", a:"无关节红肿与晨僵；无明显口干眼干。", clue:"（阴性）无关节炎 / 干燥症状" },
+  { g:"既往史 · 阴性排查", id:"n7", neg:true, q:"家族中有无黄疸、遗传性溶血或蚕豆病史？", a:"否认家族类似病史。", clue:"（阴性）无家族溶血 / 黄疸史" },
+
+  // ---- 个人史 / 婚育史 ----
+  { g:"个人史", id:"q11", q:"烟酒、饮食、旅居、职业？", a:"不吸烟、偶饮酒；饮食无生食海产；无特殊旅居史。", clue:"个人史无特殊暴露" },
+  { g:"婚育史 · 生育史", id:"q12", hidden:true, q:"婚姻、孕产次？本次是否 IVF？既往妊娠情况？", stages:[
+      { a:"她只含糊应了句：「怀过几次吧……」不愿展开。" },
+      { a:"再次追问孕产次与既往结局——她低声说：「好几次都没保住，早早就流掉了，也没查过原因。」", clue:"复发性流产史（原因未查）" } ] },
+  { g:"家族史", id:"q13", q:"家族中有无遗传病 / 自身免疫病 / 类似肝病？", a:"父母无肝病；表姐有「狼疮」类风湿病史，家里说不清。", clue:"家族自身免疫病倾向（模糊）" },
+
+  // ---- 查体 ----
+  { g:"查体 · 生命体征", id:"e1", tab:"exam", q:"T / P / R / BP / 神志", a:"T 37.6℃；P 96 次/分；R 20 次/分；BP 126/84 mmHg；神志清。", clue:"BP 126/84（偏高，需动态复测）", hidden:true },
+  { g:"查体 · 一般情况", id:"e2", tab:"exam", q:"皮肤巩膜黄染程度；蜘蛛痣 / 肝掌", a:"皮肤巩膜呈金黄色黄染；未见明显蜘蛛痣、肝掌。", clue:"金黄色黄染（混合性倾向）" },
+  { g:"查体 · 一般情况", id:"e3", tab:"exam", q:"有无皮疹、出血征、水肿？", a:"牙龈见少量渗血；面颊可见淡红斑片；双下肢轻度凹陷性水肿。", clue:"面颊淡红斑 + 下肢水肿", hidden:true },
+  { g:"查体 · 腹部", id:"e4", tab:"exam", q:"腹软/压痛、Murphy 征、肝区叩击痛、腹水征", a:"腹软，右上腹／上腹轻压痛；Murphy 征 (±)；肝区叩击痛可疑；移动性浊音 (-)，无腹壁静脉曲张。", clue:"右上腹压痛 · 肝区叩击痛可疑" },
+  { g:"查体 · 产科", id:"e5", tab:"exam", hidden:true, q:"宫高、胎心、胎动", a:"宫高大致与孕 19 周相符；多普勒反复听诊<b>未闻及胎心</b>（需立即床旁超声确认胎儿存活）。", clue:"胎心未闻及（疑胎死宫内，需超声确认）" },
+  { g:"查体 · 神经", id:"e6", tab:"exam", q:"神经专科：意识、扑翼样震颤", a:"意识清楚，扑翼样震颤阴性。", clue:"无肝性脑病征象（暂）" },
+
+  // ---- 查体 · 阴性排查 ----
+  { g:"查体 · 阴性排查", id:"n8", tab:"exam", neg:true, q:"心肺：颈静脉、肺部啰音、心脏杂音", a:"颈静脉无怒张；双肺未闻及湿啰音；未闻及病理性杂音。", clue:"（阴性）无心衰 / 肺水肿征象" },
+  { g:"查体 · 阴性排查", id:"n9", tab:"exam", neg:true, q:"脾脏是否触及？有无紫癜、瘀斑？", a:"未触及脾大；未见皮肤紫癜、大片瘀斑。", clue:"（阴性）无脾大、无紫癜" },
+  { g:"查体 · 阴性排查", id:"n10", tab:"exam", neg:true, q:"下肢有无不对称肿痛（DVT 征）？", a:"双下肢对称性轻度水肿，无单侧肿痛。", clue:"（阴性）无 DVT 征象" },
+];
+
+const TOTAL = QUESTIONS.length;
+const asked = new Set();
+const clued = new Set();
+
+const $ = s => document.querySelector(s);
+const paneAsk = $("#pane-ask"), paneExam = $("#pane-exam");
+const board = $("#board"), cnt = $("#cnt"), totalEl = $("#total");
+totalEl.textContent = TOTAL;
+
+function buildItem(item) {
+  const stages = item.stages || [{ a: item.a, clue: item.clue }];
+  const total = stages.length;
+  const multi = total > 1;
+  const el = document.createElement("div");
+  el.className = "q" + (item.hidden ? " hidden-clue" : "");
+  el.dataset.id = item.id;
+  el.dataset.stage = "0";
+  el.innerHTML = `
+    <button type="button">
+      <span class="mark">○</span>
+      <span>${item.q}</span>
+      ${multi ? `<span class="qcount">追问 0/${total}</span>` : ""}
+    </button>
+    <div class="stagebox"></div>`;
+  el.querySelector("button").addEventListener("click", () => {
+    const st = +el.dataset.stage;
+    if (st < total) {
+      const s = stages[st];
+      const d = document.createElement("div");
+      d.className = "ans" + (st > 0 ? " more" : "");
+      d.innerHTML = `<div><span class="src">${multi ? `追问（第 ${st + 1} 次）：` : "患者 / 查体："}</span>${s.a}</div>`;
+      const clue = s.clue || (st === total - 1 ? item.clue : null);
+      if (clue) {
+        d.insertAdjacentHTML("beforeend",
+          `<span class="clue ${item.hidden ? "gold" : item.neg ? "neg" : ""}">线索 ▸ ${clue}</span>`);
+      }
+      el.querySelector(".stagebox").appendChild(d);
+      el.dataset.stage = st + 1;
+      const qc = el.querySelector(".qcount");
+      if (qc) qc.textContent = `追问 ${st + 1}/${total}`;
+      if (st + 1 === total) {
+        el.dataset.done = "1";
+        el.querySelector(".mark").textContent = "●";
+        if (clue && !clued.has(item.id)) {
+          clued.add(item.id);
+          asked.add(item.id);
+          addClue(Object.assign({}, item, { clue }));
+        }
+        updateProgress();
+      }
+    } else {
+      el.querySelector(".stagebox").classList.toggle("hide");
+    }
+  });
+  return el;
+}
+
+QUESTIONS.forEach(item => {
+  const target = item.tab === "exam" ? paneExam : paneAsk;
+  // 组标题
+  let head = target.querySelector(`[data-g="${item.g}"]`);
+  if (!head) {
+    head = document.createElement("h3");
+    head.dataset.g = item.g;
+    head.textContent = item.g;
+    target.appendChild(head);
+    const list = document.createElement("div");
+    list.className = "qlist";
+    list.dataset.list = item.g;
+    target.appendChild(list);
+  }
+  target.querySelector(`[data-list="${item.g}"]`).appendChild(buildItem(item));
+});
+
+function clueGroupKey(group) {
+  if (group.startsWith("现病史")) return "现病史线索";
+  if (group.startsWith("既往史")) return "既往史线索";
+  if (group.startsWith("查体")) return "查体线索";
+  return "其他线索";
+}
+
+function addClue(item) {
+  const key = clueGroupKey(item.g);
+  let grp = board.querySelector(`[data-grp="${key}"]`);
+  if (!grp) {
+    grp = document.createElement("div");
+    grp.className = "group";
+    grp.dataset.grp = key;
+    grp.innerHTML = `<div class="gtitle">${key}</div><div class="chips"></div>`;
+    board.appendChild(grp);
+  }
+  const chip = document.createElement("span");
+  chip.className = "chip" + (item.hidden ? " gold" : item.neg ? " neg" : (item.risk ? " risk" : ""));
+  chip.textContent = item.clue;
+  grp.querySelector(".chips").appendChild(chip);
+  board.querySelector(".empty")?.remove();
+}
+
+function updateProgress() {
+  cnt.textContent = asked.size;
+  if (asked.size >= 3 && board.querySelectorAll(".group").length >= 1) {
+    $("#stageSummary").classList.remove("hide");
+  }
+  if (asked.size >= 5) { $("#gate").classList.remove("hide"); }
+}
+
+// 初始提示
+board.innerHTML = '<div class="empty">尚未采集任何线索，开始问诊 / 查体吧。</div>';
+
+// 化验单「提示」展开 / 收起
+document.querySelectorAll(".hint").forEach(b => b.addEventListener("click", () => {
+  b.classList.toggle("open");
+  const body = b.parentElement.querySelector(".hintbody");
+  if (body) body.classList.toggle("show");
+}));
+
+// Tab 切换
+document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => {
+  document.querySelectorAll(".tab").forEach(x => x.classList.toggle("active", x === t));
+  const isAsk = t.dataset.tab === "ask";
+  paneAsk.classList.toggle("hide", !isAsk);
+  paneExam.classList.toggle("hide", isAsk);
+}));
+
+// ===== 过场判断题（大/小标题）=====
+const QUIZ = [
+  { t:"先按急性病毒性肝炎处理，抗病毒＋保肝，观察 3 天", c:false,
+    why:"转氨酶仅轻中度升高、AST>ALT、LDH 极高，不符合典型病毒性肝炎；且忽略血小板与胆道评估，会延误关键治疗。" },
+  { t:"立即完善：血常规（重点血小板）＋外周血涂片＋凝血＋网织红，动态血压＋尿蛋白，并行腹部超声／MRCP 评估胆道", c:true,
+    why:"既抓住出血风险（血小板）与微血管病（涂片 / 网织红），又筛子痫前期（血压 / 尿蛋白），同时评估胆道梗阻——与后续「结石 → 梗阻」主线衔接。" },
+  { t:"明确诊断前先行肝穿刺活检", c:false,
+    why:"存在出血倾向时肝穿刺风险高，且多数诊断（HELLP / TMA / 梗阻）并不依赖活检。" },
+  { t:"直接终止妊娠以去除病因", c:false,
+    why:"病因未明即终止妊娠属过度处置，可能造成不可逆伤害（对应误诊结局 E3）。" },
+];
+
+let quizLocked = false;
+function renderQuiz() {
+  const box = $("#opts");
+  box.innerHTML = "";
+  shuffle(QUIZ.map((_, i) => i)).forEach((oi, pos) => {
+    const o = QUIZ[oi];
+    const b = document.createElement("button");
+    b.className = "opt";
+    b.type = "button";
+    b.textContent = String.fromCharCode(65 + pos) + "．" + o.t;
+    b.addEventListener("click", () => pick(b, o));
+    box.appendChild(b);
+  });
+}
+function pick(btn, o) {
+  if (quizLocked) return;
+  const fb = $("#fb");
+  record(o.c, "gate1");
+  if (o.c) {
+    quizLocked = true;
+    btn.classList.add("correct");
+    fb.className = "fb ok";
+    fb.innerHTML = "✓ 判断正确。<span class='tuto'>" + o.why + "</span>";
+    document.querySelectorAll("#opts .opt").forEach(x => x.disabled = true);
+    goAct(2);
+  } else {
+    btn.classList.add("wrong");
+    btn.disabled = true;
+    fb.className = "fb no";
+    fb.textContent = "✗ 再想想。" + o.why;
+  }
+}
+renderQuiz();
+
+// 序章 → 第一幕
+$("#toAct1").addEventListener("click", () => {
+  $("#prologue").classList.add("hide");
+  $("#act1").classList.remove("hide");
+  $("#stP0").classList.replace("active", "done");
+  $("#stA1").classList.add("active");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
+
+/* ================== 全局状态 / 评分 / 重置 ================== */
+const STATE = { good:0, bad:0, keys:{}, keyFlags:{} };
+function record(ok, key){
+  if (key !== undefined){
+    if (key in STATE.keys) return;      // 已判定过，忽略重复
+    STATE.keys[key] = !!ok;
+  }
+  ok ? STATE.good++ : STATE.bad++;
+}
+function ungrade(key){
+  if (!(key in STATE.keys)) return;
+  STATE.keys[key] ? STATE.good-- : STATE.bad--;
+  delete STATE.keys[key]; delete STATE.keyFlags[key];
+}
+function addFlag(key, flag){ if (key === undefined) return; (STATE.keyFlags[key] = STATE.keyFlags[key] || []).push(flag); }
+function currentFlags(){
+  const s = new Set();
+  Object.values(STATE.keyFlags).forEach(a => a.forEach(x => s.add(x)));
+  return s;
+}
+const STEPS = { 2:"stA2", 3:"stA3", 4:"stA4", 5:"stA5", 6:"stA6" };
+function goAct(n){
+  const sec = document.getElementById("act" + n);
+  if (sec) sec.classList.remove("hide");
+  document.querySelectorAll(".step").forEach(s => s.classList.remove("active"));
+  const st = document.getElementById(STEPS[n]);
+  if (st){ st.classList.remove("locked"); st.classList.add("done", "active"); st.textContent = st.textContent.replace(" 🔒", ""); }
+  if (sec) setTimeout(() => sec.scrollIntoView({ behavior:"smooth", block:"start" }), 30);
+}
+const MCQ_ARGS = {};
+function shuffle(a){
+  for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+function mcq(containerId, opts, fbId, onCorrect, key){
+  key = (key === undefined ? containerId : key);
+  MCQ_ARGS[containerId] = [opts, fbId, onCorrect, key];
+  const box = document.getElementById(containerId);
+  box.innerHTML = "";
+  let locked = false, counted = false;
+  shuffle(opts.map((_, i) => i)).forEach((oi, pos) => {
+    const o = opts[oi];
+    const b = document.createElement("button");
+    b.className = "opt"; b.type = "button";
+    b.textContent = String.fromCharCode(65 + pos) + "．" + o.t;
+    b.addEventListener("click", () => {
+      if (locked) return;
+      const fb = document.getElementById(fbId);
+      if (!counted){ counted = true; record(!!o.ok, key); if (!o.ok && o.flag) addFlag(key, o.flag); }
+      if (o.ok){
+        locked = true; b.classList.add("correct");
+        fb.className = "fb ok"; fb.innerHTML = "✓ <span class='tuto'>" + (o.why || "") + "</span>";
+        box.querySelectorAll(".opt").forEach(x => x.disabled = true);
+        if (onCorrect) onCorrect();
+      } else {
+        b.disabled = true; b.classList.add("wrong");
+        fb.className = "fb no"; fb.innerHTML = "✗ <span class='tuto'>" + (o.why || "") + "</span>";
+      }
+    });
+    box.appendChild(b);
+  });
+}
+function rebuildMcq(containerId, fbId){
+  if (!MCQ_ARGS[containerId]) return;
+  mcq(containerId, ...MCQ_ARGS[containerId]);
+  const fb = document.getElementById(fbId || MCQ_ARGS[containerId][1]);
+  if (fb){ fb.className = "fb"; fb.innerHTML = ""; }
+}
+function chk(listId, items){
+  const box = document.getElementById(listId);
+  box.innerHTML = "";
+  shuffle(items.map((_, i) => i)).forEach(i => {
+    const it = items[i];
+    const l = document.createElement("label");
+    l.className = "chk"; l.dataset.i = i;
+    l.innerHTML = `<input type="checkbox"><span><b>${it.t}</b>${it.n ? `<small class="tuto">${it.n}</small>` : ""}</span>`;
+    l.querySelector("input").addEventListener("change", e => l.classList.toggle("on", e.target.checked));
+    box.appendChild(l);
+  });
+}
+function pickedIndices(listId){
+  return [...document.querySelectorAll(`#${listId} .chk`)].filter(l => l.querySelector("input").checked).map(l => +l.dataset.i);
+}
+function reveal(id){ const e = document.getElementById(id); if (e) e.classList.remove("hide"); }
+
+/* ================== 第二幕 ================== */
+const ORDERS = [
+  // ── 首轮必需 ──
+  { id:"cbc", need:1, t:"血常规 + 外周血涂片 + 网织红", n:"抓血小板（18↓）与破碎红细胞（MAHA 直接证据）" },
+  { id:"coag", need:1, t:"凝血全套 + D-二聚体 + Fbg", n:"评估 DIC / 纤溶（胎死宫内可致）" },
+  { id:"lft", need:1, t:"肝功能全套 + 胆红素分类 + LDH", n:"定位黄疸类型" },
+  { id:"vir", need:1, t:"肝炎病毒全套", n:"排除病毒性肝炎" },
+  { id:"bp", need:1, t:"动态血压 + 尿常规（尿蛋白 / 尿胆红素）", n:"筛子痫前期；尿胆红素区分黄疸" },
+  { id:"us", need:1, t:"腹部超声 + 产科超声", n:"胆道扩张？胎心？" },
+  { id:"mrcp", need:1, t:"MRCP", n:"胆道梗阻定位" },
+  { id:"cross", need:1, t:"血型 + 交叉配血（备血 / 备血小板）", n:"有创操作 + 重度血小板减少，需备血" },
+  // ── 合理可选（不算错）──
+  { id:"auto", need:0, t:"自身抗体谱（ANA / 抗 dsDNA / APS）", n:"可查；但非当前急症首轮必需" },
+  { id:"bile", need:0, t:"血培养 + 胆汁培养", n:"明确感染源、指导抗生素" },
+  { id:"hemo", need:0, t:"G6PD 活性 + 红细胞脆性 + 血红蛋白电泳", n:"查溶血病因（遗传性）" },
+  { id:"ecg", need:0, t:"心电图 + 心脏超声", n:"TMA 可累及心脏" },
+  { id:"ct", need:0, t:"上腹部增强 CT", n:"评估胰腺 / 胆道（有辐射）" },
+  { id:"bm", need:0, t:"骨髓穿刺 + 活检", n:"评估巨核细胞、排除血液病" },
+  // ── 过度 / 高风险（错误）──
+  { id:"bio", need:0, risk:1, t:"肝穿刺活检", n:"PLT 18 时风险高，且多数诊断不依赖活检" },
+  { id:"pet", need:0, risk:1, t:"全身 PET-CT", n:"辐射大、无指征" },
+  { id:"surg", need:0, risk:1, t:"立即开腹手术探查", n:"应先内镜（ERCP）引流，开腹创伤大" }
+];
+chk("orders", ORDERS.map(o => ({ t:o.t, n:o.n })));
+document.getElementById("submitOrders").addEventListener("click", () => {
+  const box = document.getElementById("orders");
+  const picked = new Set(pickedIndices("orders").map(i => ORDERS[i].id));
+  const missed = [], risky = [];
+  ORDERS.forEach((o, i) => {
+    const l = box.querySelector(`.chk[data-i="${i}"]`);
+    l.classList.remove("miss", "bad");
+    if (o.need && !picked.has(o.id)){ missed.push(o.t); l.classList.add("miss"); }
+    if (o.risk && picked.has(o.id)){ risky.push(o.t); l.classList.add("bad"); }
+  });
+  const ok = !missed.length && !risky.length;
+  record(ok, "orders");
+  const fb = document.getElementById("orderFb");
+  if (ok){ fb.className = "fb ok"; fb.innerHTML = "✓ 开单合理：关键项目齐全，未做无谓 / 高风险检查。"; box.querySelectorAll("input").forEach(i => i.disabled = true); }
+  else {
+    fb.className = "fb no";
+    fb.innerHTML = (missed.length ? `<div>✗ 漏开关键项：${missed.join("、")}</div>` : "") + (risky.length ? `<div>✗ 过度 / 风险检查：${risky.join("、")}</div>` : "") + `<div class="muted">可修正后再次提交。</div>`;
+  }
+  reveal("labCard"); reveal("p1Card");
+});
+
+const P1_ITEMS = [
+  { t:"DBil/TBil ≈ 80%（结合为主）；尿胆红素大量", ans:"chol" },
+  { t:"GGT 230 / ALP 250 明显升高", ans:"chol" },
+  { t:"LDH 915↑；网织红 10%↑；外周血大量破碎红细胞", ans:"hemo" },
+  { t:"ALT 177 / AST 155（轻中度升高）", ans:"hepa" }
+];
+const P1_OPTS = [ ["hemo","溶血性"], ["hepa","肝细胞性"], ["chol","胆汁淤积性"] ];
+const p1Box = document.getElementById("p1");
+P1_ITEMS.forEach((it, i) => {
+  const row = document.createElement("div"); row.className = "q"; row.style.padding = "10px 12px";
+  row.innerHTML = `<div style="font-size:13.5px;margin-bottom:8px">${i+1}. ${it.t}</div>
+    <div class="pick">${P1_OPTS.map(([k,v]) => `<button type="button" data-k="${k}">${v}</button>`).join("")}</div>`;
+  row.querySelectorAll(".pick button").forEach(b => b.addEventListener("click", () => {
+    row.querySelectorAll(".pick button").forEach(x => x.classList.remove("on"));
+    b.classList.add("on"); row.dataset.pick = b.dataset.k;
+  }));
+  p1Box.appendChild(row);
+});
+document.getElementById("submitP1").addEventListener("click", () => {
+  const rows = [...p1Box.querySelectorAll(".q")];
+  let all = true;
+  rows.forEach((r, i) => {
+    const k = r.dataset.pick, ok = k === P1_ITEMS[i].ans;
+    r.querySelectorAll(".pick button").forEach(b => {
+      if (b.dataset.k === P1_ITEMS[i].ans) b.classList.add("ok");
+      if (b.dataset.k === k && !ok) b.classList.add("no");
+    });
+    if (!ok) all = false;
+  });
+  record(all, "p1");
+  const fb = document.getElementById("p1Fb");
+  fb.className = all ? "fb ok" : "fb no";
+  fb.textContent = all ? "✓ 归类正确。" : "✗ 有归类错误（已标出正确项），可重选后再提交。";
+  if (all){
+    reveal("p1final");
+    document.getElementById("p1final").innerHTML = `<p class="muted">综合判断：本例以<b>胆汁淤积（肝外梗阻）</b>为主，同时叠加<b>溶血 / 微血管病</b>成分；肝细胞损伤为轻中度，可能继发于梗阻 / 感染。</p>`;
+    reveal("gate2Card");
+  }
+});
+mcq("opts2", [
+  { t:"妊娠期单纯 ICP，对症止痒即可", why:"无瘙痒、GGT 明显升高且有胆管扩张 → 不支持单纯 ICP。" },
+  { t:"胆道梗阻 + 急性胆管炎（± 胆源性胰腺炎），需 MRCP 定位、尽早 ERCP 引流", ok:true, why:"Charcot 三联征 + 结合性重度黄疸 + 胆管扩张 + 炎症指标升高，三项诊断标准均满足，是当前首要矛盾。" },
+  { t:"单纯病毒性肝炎，抗病毒 + 保肝观察", why:"转氨酶未达暴发性水平，且不能解释胆管扩张。" },
+  { t:"单纯 HELLP，立即终止妊娠", why:"HELLP 不能解释重度结合性高胆红素与胆管扩张。" }
+], "fb2", () => goAct(3));
+
+/* ================== 第三幕 ================== */
+const DIFF = [
+  { d:"HELLP 综合征", ans:"partial", why:"溶血 + 肝酶↑ + PLT↓ 符合；但不能解释以结合型为主的重度黄疸与胆管扩张，且 19 周偏早 → 并存保留，非首要矛盾。" },
+  { d:"妊娠期急性脂肪肝 AFLP", ans:"no", why:"无低血糖、高氨、凝血障碍，非晚孕呕吐起病 → 不支持。" },
+  { d:"妊娠期肝内胆汁淤积 ICP", ans:"no", why:"无瘙痒；GGT 明显升高且有胆管扩张 → 不支持单纯 ICP。" },
+  { d:"子痫前期 / 子痫", ans:"partial", why:"BP 150/90、尿蛋白 1 g/L 需动态监测（可并存）；但发热 + 神经症状 + 重度血小板减少更提示 TTP → 警惕，非主线。" },
+  { d:"急性病毒性肝炎", ans:"no", why:"转氨酶未达 >10–20×ULN；病毒学待查 / 阴性 → 不支持。" }
+];
+const DIFF_OPTS = [ ["yes","支持"], ["partial","部分符合"], ["no","不支持"] ];
+const diffBody = document.getElementById("diffBody");
+DIFF.forEach((it, i) => {
+  const tr = document.createElement("tr");
+  tr.innerHTML = `<td>${it.d}</td>
+    <td><div class="pick">${DIFF_OPTS.map(([k,v]) => `<button type="button" data-k="${k}">${v}</button>`).join("")}</div></td>
+    <td class="dWhy muted">—</td>`;
+  tr.querySelectorAll(".pick button").forEach(b => b.addEventListener("click", () => {
+    tr.querySelectorAll(".pick button").forEach(x => x.classList.remove("on"));
+    b.classList.add("on"); tr.dataset.pick = b.dataset.k;
+  }));
+  diffBody.appendChild(tr);
+});
+document.getElementById("submitDiff").addEventListener("click", () => {
+  const rows = [...diffBody.querySelectorAll("tr")];
+  let all = true;
+  rows.forEach((r, i) => {
+    const k = r.dataset.pick, ok = k === DIFF[i].ans;
+    r.querySelectorAll(".pick button").forEach(b => {
+      if (b.dataset.k === DIFF[i].ans) b.classList.add("ok");
+      if (b.dataset.k === k && !ok) b.classList.add("no");
+    });
+    r.querySelector(".dWhy").textContent = DIFF[i].why;
+    if (!ok) all = false;
+  });
+  record(all, "diff");
+  const fb = document.getElementById("diffFb");
+  fb.className = all ? "fb ok" : "fb no";
+  fb.textContent = all ? "✓ 鉴别方向正确：首要矛盾落在胆道梗阻 + 急性胆管炎，其余保留并存观察。" : "✗ 有判断与要点不符（正确项已标出），可修正。";
+  reveal("dirCard");
+});
+mcq("dirOpts", [
+  { t:"胆道梗阻 + 急性胆管炎（首要矛盾）", ok:true, why:"结合 Charcot 三联征、结合性重度黄疸、胆管扩张与炎症指标，应以此为主线并保留 HELLP / 子痫并存监测。" },
+  { t:"急性病毒性肝炎 → 抗病毒 + 保肝", flag:"wrongDirection", why:"转氨酶与病毒学均不支持，会延误引流。" },
+  { t:"单纯 HELLP → 立即终止妊娠", flag:"wrongDirection", why:"忽略胆道梗阻这一可解救的关键矛盾。" },
+  { t:"单纯 ICP → 熊去氧胆酸观察", flag:"wrongDirection", why:"GGT 高 + 胆管扩张不支持 ICP。" }
+], "dirFb", () => reveal("gate3Card"));
+mcq("opts3", [
+  { t:"转诊急诊、评估 ERCP 指征并尽快胆道引流（同时纠正血小板、MDT 协作）", ok:true, why:"急性胆管炎合并梗阻，唯一能同时「诊断 + 治疗」的是 ERCP；不做可迅速进展为脓毒性休克。" },
+  { t:"继续在当地抗感染观察 3 天", why:"单靠抗生素不能解除梗阻。" },
+  { t:"先做肝穿刺活检明确病因", why:"有出血倾向、风险高，且当前不需活检。" }
+], "fb3", () => goAct(4));
+
+/* ================== 第四幕 ================== */
+const CHARCOT = [
+  { t:"发热（39℃）/ 寒战", c:true },
+  { t:"右上腹痛（NRS 5）", c:true },
+  { t:"重度黄疸加深", c:true },
+  { t:"持续头痛", c:false },
+  { t:"牙龈渗血 / 前胸瘀点", c:false },
+  { t:"乏力、食欲差", c:false },
+  { t:"BP 150/90", c:false }
+];
+chk("charcot", CHARCOT.map(o => ({ t:o.t })));
+document.getElementById("submitCharcot").addEventListener("click", () => {
+  const picked = pickedIndices("charcot");
+  const correct = picked.length === 3 && picked.every(i => CHARCOT[i].c);
+  const box = document.getElementById("charcot");
+  CHARCOT.forEach((o, i) => {
+    const l = box.querySelector(`.chk[data-i="${i}"]`);
+    l.classList.remove("miss", "bad");
+    if (o.c && !picked.includes(i)) l.classList.add("miss");
+    if (!o.c && picked.includes(i)) l.classList.add("bad");
+  });
+  record(correct, "charcot");
+  const fb = document.getElementById("charcotFb");
+  fb.className = correct ? "fb ok" : "fb no";
+  fb.innerHTML = correct
+    ? "✓ 正确：发热 / 寒战 + 右上腹痛 + 黄疸 = Charcot 三联征，提示急性胆管炎；若再加低血压 + 意识改变即为 Reynolds 五联征。"
+    : "✗ 应为「发热 / 寒战 + 右上腹痛 + 黄疸」三项（黄色为漏选，红色为多选）。可重选后提交。";
+  if (correct) reveal("ercpCard");
+});
+mcq("ercpOpts", [
+  { t:"立即（急诊）ERCP：乳头切开 ± 取石 + 胆管/胰管支架引流，同时纠正血小板", ok:true, why:"术中见黑胆汁、胆管下段狭窄 + 可疑充盈缺损，留置胆管 + 胰管支架，术后 TBil/DBil 由 400.9/320.2 降至 180.2/100.5（↓≈55%）——减压有效。" },
+  { t:"先静脉抗生素观察 48 h，无效再引流", flag:"erDelay", why:"急性胆管炎合并梗阻，抗生素不能解除梗阻；拖延可致脓毒性休克、MODS（死亡分支）。" },
+  { t:"仅支持治疗，拒绝有创操作", flag:"erDelay", why:"不解除梗阻，感染无法控制。" }
+], "ercpFb", () => reveal("consentCard"));
+const CONSENT = [
+  { t:"如实告知：胆道梗阻 + 急性胆管炎，血小板极低、出血风险高，属急危重症", c:true },
+  { t:"说明不处理的后果（感染性休克、危及母胎）与 ERCP 必要性与获益", c:true },
+  { t:"客观说明辐射：剂量很小、有防护、低于已知阈值，但无法承诺零风险", c:true },
+  { t:"说明替代方案及局限（抗生素/支持不能解除梗阻；PTCD 有辐射；手术创伤大）", c:true },
+  { t:"建议 MDT 会诊后统一沟通，共同决策并记录", c:true },
+  { t:"为免家属担心，暂不主动提辐射风险", c:false, flag:"consent", why:"隐瞒风险会破坏信任，属错误沟通（伦理支线）。" },
+  { t:"承诺「绝对不影响胎儿」以争取签字", c:false, flag:"consent", why:"医学上无法承诺零风险，过度保证不负责任。" }
+];
+chk("consent", CONSENT.map(o => ({ t:o.t })));
+document.getElementById("submitConsent").addEventListener("click", () => {
+  const picked = pickedIndices("consent");
+  const box = document.getElementById("consent");
+  let missed = 0, bad = 0;
+  CONSENT.forEach((o, i) => {
+    const l = box.querySelector(`.chk[data-i="${i}"]`);
+    l.classList.remove("miss", "bad");
+    if (o.c && !picked.includes(i)){ l.classList.add("miss"); missed++; }
+    if (!o.c && picked.includes(i)){ l.classList.add("bad"); bad++; addFlag("consent", o.flag); }
+  });
+  const ok = !missed && !bad;
+  record(ok, "consent");
+  const fb = document.getElementById("consentFb");
+  fb.className = ok ? "fb ok" : "fb no";
+  fb.innerHTML = ok ? "✓ 沟通完整：告知病情与后果、辐射剂量与防护（低于阈值但非零）、替代方案与局限，并 MDT / 共同决策。"
+    : "✗ 沟通有缺漏或不当（黄色漏选 / 红色多选），可修正后提交。";
+  if (ok) reveal("gate4Card");
+});
+mcq("opts4", [
+  { t:"认为感染已控制，减少监测", why:"胆红素下降不等于全身过程好转，必须盯着血液学指标。" },
+  { t:"复查血常规 + 网织红 + 外周血涂片 + LDH + 凝血，盯住「分离现象」", ok:true, why:"减压后胆红素↓，但若溶血 / 血小板 / 肾损不改善，提示存在独立于梗阻的全身性过程（TMA）。" },
+  { t:"立即拔除胆管支架", why:"支架是引流通道，需保留。" }
+], "fb4", () => goAct(5));
+
+/* ================== 第五幕 ================== */
+const SEP = [
+  { t:"TBil/DBil 400.9/320.2 → 180.2/100.5 μmol/L（↓≈55%）", improved:true },
+  { t:"HGB 70 → 60 g/L（进行性加重）", improved:false },
+  { t:"PLT 18 → ~20×10⁹/L（未升）", improved:false },
+  { t:"LD/LDH 915 → 500 U/L（仍显著升高）", improved:false },
+  { t:"Cr 111 → 120 μmol/L（恶化）+ 尿蛋白 1 g/L", improved:false },
+  { t:"发热 + 头痛（持续）", improved:false }
+];
+const sepBody = document.getElementById("sepBody");
+SEP.forEach((it, i) => {
+  const tr = document.createElement("tr");
+  tr.innerHTML = `<td>${it.t}</td>
+    <td><div class="pick"><button type="button" data-k="y">改善</button><button type="button" data-k="n">不改善</button></div></td>`;
+  tr.querySelectorAll(".pick button").forEach(b => b.addEventListener("click", () => {
+    tr.querySelectorAll(".pick button").forEach(x => x.classList.remove("on"));
+    b.classList.add("on"); tr.dataset.pick = b.dataset.k;
+  }));
+  sepBody.appendChild(tr);
+});
+document.getElementById("submitSep").addEventListener("click", () => {
+  const rows = [...sepBody.querySelectorAll("tr")];
+  let all = true;
+  rows.forEach((r, i) => {
+    const k = r.dataset.pick, ok = (k === "y") === SEP[i].improved;
+    r.querySelectorAll(".pick button").forEach(b => {
+      const good = (b.dataset.k === "y") === SEP[i].improved;
+      if (good) b.classList.add("ok"); else if (b.dataset.k === k) b.classList.add("no");
+    });
+    if (!ok) all = false;
+  });
+  record(all, "sep");
+  const fb = document.getElementById("sepFb");
+  fb.className = all ? "fb ok" : "fb no";
+  fb.innerHTML = all
+    ? "✓ 抓住了「分离现象」：<b>梗阻这条线在改善（胆红素↓）</b>，但溶血 / 血小板 / 肾损 / 神经症状<b>不随减压改善</b> → 存在独立于胆道的全身性过程。"
+    : "✗ 判断有误（正确项已标出）：注意「改善」只适用于胆红素，其余多为不改善。";
+  if (all) reveal("tmaCard");
+});
+mcq("tmaOpts", [
+  { t:"DIC（死胎 / 脓毒症相关）", why:"可并存，但发热 + 头痛 + 肾损 + 破碎红细胞更符合 TTP 五联征。" },
+  { t:"HELLP 综合征", why:"孕周偏早、无高血压 / 蛋白尿主线，且 ADAMTS13 将进一步区分。" },
+  { t:"aHUS（非典型溶血尿毒症）", why:"以补体介导、肾损突出为特点；本例补体未见活化。" },
+  { t:"血栓性血小板减少性紫癜（TTP）——五联征齐全", ok:true, why:"MAHA（破碎红细胞 + 网织红 10% + LD↑）+ 血小板↓ + 神经症状（头痛）+ 发热 + 肾损（Cr↑、尿蛋白）——经典 TTP 五联征。" }
+], "tmaFb", () => reveal("adamtsCard"));
+mcq("adamtsOpts", [
+  { t:"急查 ADAMTS13 活性 + 抑制物（并行补体、Coombs、凝血、血涂片）", ok:true, why:"ADAMTS13 是 TTP 与 HELLP 的分水岭；TTP 靠血浆置换、HELLP 靠终止妊娠，方向完全不同。" },
+  { t:"默认 HELLP，直接终止妊娠", flag:"noAdamts13", why:"「孕期 + 溶血 + 血小板↓」不等于 HELLP；误判会漏掉 iTTP 的特异性治疗。" },
+  { t:"只复查血常规，继续观察", flag:"noAdamts13", why:"会错失血浆置换窗口，神经 / 肾不可逆损害。" }
+], "adamtsFb", () => {
+  reveal("adamtsRes");
+  document.getElementById("adamtsRes").innerHTML = `<div class="card" style="box-shadow:none">
+    <b>结果回报：</b>ADAMTS13 酶活性 <b>&lt; 5%</b>（正常 &gt; 67%）、<b>抑制物抗体阳性</b>；补体系统<b>未见活化</b>；追问病史：第 3 次妊娠，前 2 次于孕 7、8 周不明原因自然流产。
+    <div class="note">→ 由「疑 TTP」升级为<b>确诊免疫性 TTP（iTTP）</b>；复发性流产提示需筛查 APS / 易栓症。</div></div>`;
+  reveal("pexCard");
+});
+mcq("pexOpts", [
+  { t:"立即启动血浆置换 + 糖皮质激素（不等确诊；必要时加利妥昔单抗 / 卡普赛珠单抗）", ok:true, why:"iTTP 一线治疗：PEX + 激素，尽早开始、不等确诊；利妥昔单抗降低复发。" },
+  { t:"等 ADAMTS13 结果出来再决定", why:"PEX 不必等待确诊，延迟会加重神经 / 肾损害。" },
+  { t:"预防性输注血小板纠正 PLT", flag:"pltTransfuse", why:"TTP 中预防性输血小板可加重微血栓，除非危及生命的大出血——属禁忌 / 慎用。" }
+], "pexFb", () => reveal("gate5Card"));
+mcq("opts5", [
+  { t:"iTTP 已缓解，停诊观察", why:"忽略复发风险与潜在根病。" },
+  { t:"追查根本病因：自身抗体谱（ANA、抗 dsDNA、抗磷脂抗体等）", ok:true, why:"复发性流产 + 光敏 / 口腔溃疡 / 脱发提示自身免疫背景，追查方能触及「一元论」。" },
+  { t:"立即安排再次妊娠", why:"病因未控，再次妊娠复发风险极高。" }
+], "fb5", () => goAct(6));
+
+/* ================== 第六幕 · 结局 ================== */
+mcq("uniOpts", [
+  { t:"多个独立疾病碰巧同时发生", why:"无法解释「一源多响」。" },
+  { t:"病毒性肝炎后遗 + 巧合", why:"病毒学不支持。" },
+  { t:"系统性红斑狼疮（SLE），继发抗磷脂综合征（APS）", ok:true, why:"SLE 产生抗 ADAMTS13 抗体（→ iTTP）与抗磷脂抗体（→ APS → 复发性流产 / 胎死宫内），免疫复合物沉积 → 狼疮肾炎；慢性溶血 → 色素性结石 → 胆道梗阻。一源多响。" },
+  { t:"单纯遗传性溶血性疾病", why:"不能解释多系统自身免疫表现。" }
+], "uniFb", renderEnding);
+
+function renderEnding(){
+  const f = currentFlags();
+  const rate = (STATE.good + STATE.bad) ? STATE.good / (STATE.good + STATE.bad) : 0;
+  let e;
+  if (f.has("erDelay")) e = { cls:"bad", t:"E4 · 死亡结局 —— 忽视胆道梗阻", b:"ERCP 拖延 / 放弃引流，急性胆管炎进展为脓毒性休克、MODS。救命第一要务是<b>解除梗阻</b>——胆管梗阻一定要解决。" };
+  else if (f.has("noAdamts13")) e = { cls:"bad", t:"E5 · 漏诊结局 —— 默认 HELLP", b:"未查 ADAMTS13 即按 HELLP 处理，漏诊 iTTP、未行血浆置换 → 神经 / 肾不可逆损害，再次妊娠复发风险高。" };
+  else if (f.has("wrongDirection")) e = { cls:"bad", t:"E3 · 误诊结局 —— 方向错误", b:"初诊方向偏离胆道梗阻主线，延误引流或错误终止妊娠。" };
+  else if (f.has("consent")) e = { cls:"", t:"E6 · 伦理沟通支线", b:"临床处理正确，但知情同意 / 沟通存在缺漏，医患信任受损（教学伦理）。" };
+  else if (rate >= 0.85) e = { cls:"", t:"E1 · 真结局（金）", b:"规范诊疗：ERCP 减压 + 引产清宫 + 血浆置换 + 激素 + 利妥昔单抗，并追及根病 SLE（+ 继发 APS）→ iTTP 缓解、狼疮获控。", egg:"🎉 彩蛋：3 个月后拔除胆管支架；2025 年再次自然妊娠，顺产一男婴，目前母子均体健、恢复良好。" };
+  else e = { cls:"", t:"E2 · 次优结局（银）", b:"抢救成功，但根病（SLE / APS）追查不足 → 复发风险仍存；未来妊娠需孕前 MDT 规划与严密监测。" };
+  const el = document.getElementById("endingCard");
+  el.classList.remove("hide");
+  el.innerHTML = `<div class="ending ${e.cls}"><h3>${e.t}</h3><p>${e.b}</p>${e.egg ? `<p class="note">${e.egg}</p>` : ""}
+    <p class="note">本轮判定：正确 ${STATE.good} / 共 ${STATE.good + STATE.bad} 项；风险标记：${f.size ? [...f].join("、") : "无"}。</p></div>`;
+  reveal("reviewCard");
+  setTimeout(() => el.scrollIntoView({ behavior:"smooth", block:"start" }), 30);
+}
+
+/* ================== 重置（谜题 / 大 Part） ================== */
+function hideAll(ids){ ids.forEach(id => { const e = document.getElementById(id); if (e) e.classList.add("hide"); }); }
+function clearFb(id){ const e = document.getElementById(id); if (e){ e.className = "fb"; e.innerHTML = ""; } }
+function clearChk(listId){
+  document.querySelectorAll(`#${listId} .chk`).forEach(l => {
+    l.classList.remove("on", "miss", "bad");
+    const i = l.querySelector("input"); if (i){ i.checked = false; i.disabled = false; }
+  });
+}
+function clearPicks(rootSel){
+  document.querySelectorAll(`${rootSel} .pick button`).forEach(b => b.classList.remove("on", "ok", "no"));
+  document.querySelectorAll(`${rootSel} .q, ${rootSel} tr`).forEach(r => { delete r.dataset.pick; });
+}
+const DEP = {
+  opts2:["gate2Card"], dirOpts:["gate3Card"], opts3:[],
+  ercpOpts:["consentCard","gate4Card"], opts4:[],
+  tmaOpts:["adamtsCard","pexCard","gate5Card","adamtsRes"],
+  adamtsOpts:["adamtsRes","pexCard","gate5Card"], pexOpts:["gate5Card"], opts5:[],
+  uniOpts:["endingCard","reviewCard"]
+};
+function resetOrders(){ clearChk("orders"); clearFb("orderFb"); ungrade("orders"); }
+function resetP1(){ clearPicks("#p1"); clearFb("p1Fb"); ungrade("p1"); hideAll(["p1final","gate2Card"]); }
+function resetDiff(){ clearPicks("#diffBody"); document.querySelectorAll("#diffBody .dWhy").forEach(t => t.textContent = "—"); clearFb("diffFb"); ungrade("diff"); hideAll(["dirCard","gate3Card"]); }
+function resetCharcot(){ clearChk("charcot"); clearFb("charcotFb"); ungrade("charcot"); hideAll(["ercpCard","consentCard","gate4Card"]); }
+function resetConsent(){ clearChk("consent"); clearFb("consentFb"); ungrade("consent"); hideAll(["gate4Card"]); }
+function resetSep(){ clearPicks("#sepBody"); clearFb("sepFb"); ungrade("sep"); hideAll(["tmaCard","adamtsCard","pexCard","gate5Card","adamtsRes"]); }
+function resetMcq(containerId){
+  const fb = MCQ_ARGS[containerId] ? MCQ_ARGS[containerId][1] : containerId;
+  rebuildMcq(containerId, fb); ungrade(containerId);
+  hideAll(DEP[containerId] || []);
+}
+function resetAct1(){
+  document.querySelectorAll("#pane-ask .q, #pane-exam .q").forEach(el => {
+    el.dataset.done = "0"; el.dataset.stage = "0";
+    const m = el.querySelector(".mark"); if (m) m.textContent = "○";
+    const sb = el.querySelector(".stagebox"); if (sb) sb.innerHTML = "";
+    const qc = el.querySelector(".qcount");
+    if (qc){ const it = QUESTIONS.find(q => q.id === el.dataset.id); const tot = it && it.stages ? it.stages.length : 1; qc.textContent = "追问 0/" + tot; }
+  });
+  asked.clear(); clued.clear();
+  board.innerHTML = '<div class="empty">尚未采集任何线索，开始问诊 / 查体吧。</div>';
+  cnt.textContent = "0";
+  hideAll(["stageSummary", "gate"]);
+  clearFb("fb");
+  quizLocked = false; renderQuiz(); ungrade("gate1");
+}
+const ACT_RESET = {
+  1: () => resetAct1(),
+  2: () => { resetOrders(); resetP1(); resetMcq("opts2"); },
+  3: () => { resetDiff(); resetMcq("dirOpts"); resetMcq("opts3"); hideAll(["dirCard","gate3Card"]); },
+  4: () => { resetCharcot(); resetMcq("ercpOpts"); resetConsent(); resetMcq("opts4"); hideAll(["ercpCard","consentCard","gate4Card"]); },
+  5: () => { resetSep(); resetMcq("tmaOpts"); resetMcq("adamtsOpts"); resetMcq("pexOpts"); resetMcq("opts5"); },
+  6: () => { resetMcq("uniOpts"); }
+};
+
+// 每个大 Part 顶部注入「重置本 Part」
+Object.entries(ACT_RESET).forEach(([n, fn]) => {
+  const sec = document.getElementById("act" + n); if (!sec) return;
+  const bar = document.createElement("div"); bar.className = "partbar";
+  const b = document.createElement("button");
+  b.className = "btn ghost"; b.type = "button"; b.textContent = "↺ 重置本 Part";
+  b.addEventListener("click", () => fn());
+  bar.appendChild(b);
+  sec.insertBefore(bar, sec.firstChild);
+});
+
+// 每个谜题的「重置」按钮
+[ ["submitOrders", resetOrders], ["submitP1", resetP1], ["submitDiff", resetDiff],
+  ["submitCharcot", resetCharcot], ["submitConsent", resetConsent], ["submitSep", resetSep] ]
+.forEach(([id, fn]) => {
+  const b = document.getElementById(id); if (!b) return;
+  const g = document.createElement("button");
+  g.className = "btn ghost"; g.type = "button"; g.textContent = "↺ 重置"; g.style.marginLeft = "8px";
+  g.addEventListener("click", fn);
+  b.insertAdjacentElement("afterend", g);
+});
+["opts2","dirOpts","opts3","ercpOpts","opts4","tmaOpts","adamtsOpts","pexOpts","opts5","uniOpts"]
+.forEach(c => {
+  const box = document.getElementById(c); if (!box) return;
+  const g = document.createElement("button");
+  g.className = "btn ghost"; g.type = "button"; g.textContent = "↺ 重置"; g.style.marginTop = "10px";
+  g.addEventListener("click", () => resetMcq(c));
+  box.insertAdjacentElement("afterend", g);
+});
+/* ================== 模式切换（教学模式 / Pro 模式） ================== */
+const MODE_KEY = "pbl-jaundice-mode";
+function setMode(m){
+  const pro = (m === "pro");
+  document.body.classList.toggle("pro", pro);
+  document.querySelectorAll(".modebtn").forEach(b => b.classList.toggle("active", b.dataset.mode === m));
+  const t = document.getElementById("modetip");
+  if (t) t.textContent = pro ? "已隐藏提示与解析，仅保留基本信息" : "含提示与解析";
+  try { localStorage.setItem(MODE_KEY, m); } catch (e) {}
+}
+document.querySelectorAll(".modebtn").forEach(b => b.addEventListener("click", () => setMode(b.dataset.mode)));
+try { setMode(localStorage.getItem(MODE_KEY) || "teach"); } catch (e) { setMode("teach"); }
+</script>
+</body>
+</html>
