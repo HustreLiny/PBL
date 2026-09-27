@@ -11,10 +11,16 @@ import { Mdt } from './components/Mdt';
 import { Talk } from './components/Talk';
 import { ChapterEnd, Ending, Reveal } from './components/Settle';
 import { Help } from './components/Help';
+import { About } from './components/About';
+import { SmallScreen } from './components/SmallScreen';
+
+/** 审阅入口只在网址带 ?review 时出现，玩家看不到 */
+const REVIEW = new URLSearchParams(location.search).has('review');
 
 function Title({ onStart }: { onStart: (chapter: ChapterId, suggested: boolean) => void }) {
   const [chapter, setChapter] = useState<ChapterId>('p0');
   const [suggested, setSuggested] = useState(false);
+  const [about, setAbout] = useState(false);
   const late = CHAPTER_ORDER.indexOf(chapter) > CHAPTER_ORDER.indexOf('c2');
   return (
     <div className="title-screen">
@@ -24,26 +30,34 @@ function Title({ onStart }: { onStart: (chapter: ChapterId, suggested: boolean) 
       <button className="primary big" onClick={() => onStart('p0', false)}>
         从头开始
       </button>
-      <details className="review-box">
-        <summary>审阅用：从某一章开始</summary>
-        <p className="hint-text">前面章节的核心资料会直接放进信息板。</p>
-        <div className="row" style={{ justifyContent: 'center' }}>
-          <select value={chapter} onChange={(e) => setChapter(e.target.value as ChapterId)}>
-            {CHAPTER_ORDER.map((c) => (
-              <option key={c} value={c}>
-                {CHAPTERS[c].no} · {CHAPTERS[c].title}
-              </option>
-            ))}
-          </select>
-          <button onClick={() => onStart(chapter, suggested)}>从这一章开始</button>
-        </div>
-        {late && (
-          <label className="review-toggle">
-            <input type="checkbox" checked={suggested} onChange={(e) => setSuggested(e.target.checked)} />
-            假设第二章已提出 TMA／TTP 怀疑
-          </label>
-        )}
-      </details>
+      <p>
+        <button className="link" onClick={() => setAbout(true)}>
+          关于
+        </button>
+      </p>
+      {REVIEW && (
+        <details className="review-box" open>
+          <summary>审阅用：从某一章开始</summary>
+          <p className="hint-text">前面章节的核心资料会直接放进信息板。</p>
+          <div className="row" style={{ justifyContent: 'center' }}>
+            <select value={chapter} onChange={(e) => setChapter(e.target.value as ChapterId)}>
+              {CHAPTER_ORDER.map((c) => (
+                <option key={c} value={c}>
+                  {CHAPTERS[c].no} · {CHAPTERS[c].title}
+                </option>
+              ))}
+            </select>
+            <button onClick={() => onStart(chapter, suggested)}>从这一章开始</button>
+          </div>
+          {late && (
+            <label className="review-toggle">
+              <input type="checkbox" checked={suggested} onChange={(e) => setSuggested(e.target.checked)} />
+              假设第二章已提出 TMA／TTP 怀疑
+            </label>
+          )}
+        </details>
+      )}
+      {about && <About onClose={() => setAbout(false)} />}
     </div>
   );
 }
@@ -106,6 +120,7 @@ export default function App() {
           {withTools && <Tools />}
         </main>
         <Help />
+        <SmallScreen />
       </div>
     </Ctx.Provider>
   );

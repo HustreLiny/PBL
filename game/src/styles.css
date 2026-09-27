@@ -338,3 +338,14 @@ textarea.notes { width: 100%; min-height: 300px; border: 2px solid var(--line); 
 .help-row { display: grid; grid-template-columns: 5em 1fr; gap: 8px; padding: 6px 0; border-bottom: 1px dashed var(--chip); }
 .help dt { color: var(--accent); }
 .help dd { margin: 0; }
+
+/* 关于、手机提示、出错页 */
+.about { width: min(560px, 100%); }
+.about ul { padding-left: 1.2em; }
+.about a { color: var(--accent); }
+.small-screen { width: min(420px, 100%); }
+.crash { max-width: 640px; margin: 12vh auto 0; background: var(--panel); padding: 16px 20px; }
+.crash-msg {
+  white-space: pre-wrap; background: #fff; border: 2px solid var(--line); padding: 8px;
+  font-size: 0.85em; max-height: 30vh; overflow: auto;
+}

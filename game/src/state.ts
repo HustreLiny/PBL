@@ -7,7 +7,8 @@ import type { Mark } from './data/chapters/c3';
 import { replyTo, SUGGESTIONS } from './data/suggestions';
 import type { QuestionVerdict } from './engine/grade';
 
-export const SAVE_KEY = 'pbl-save-v4';
+/** 存档键。内容改动让旧存档对不上时换一个值，旧存档就不再读取 */
+export const SAVE_KEY = 'pbl-save-v5';
 
 export interface GameState {
   phase: Phase;
