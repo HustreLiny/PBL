@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 
-/** 美术素材的来源；换上正式美术后改这一行 */
-const ART_CREDIT = '当前为占位图，正式美术制作中。';
+/** 游戏内展示的美术素材来源 */
+const ART_CREDIT = '场景、人物与对话头像由 OpenAI 图像生成工具制作，并按游戏像素规格整理。';
 
 export function About({ onClose }: { onClose: () => void }) {
   useEffect(() => {

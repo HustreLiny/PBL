@@ -14,7 +14,7 @@ npm run build    # 输出 dist/，Vercel 构建命令同此，输出目录 dist�
 
 ## 美术替换
 
-把图片放进 `public/art/`，文件名与占位图上标的一致，就会自动替换占位图。像素图按原始尺寸出图，显示时整体放大，保持像素锐利。
+`public/art/` 已补齐下表的 22 张场景、人物和对话头像。需要更新素材时，使用相同文件名替换即可。图片按表中的原始尺寸保存，显示时整体放大，保持像素锐利。
 
 场景是横版卷轴：画面高 270，宽度因场景而异，镜头每次显示其中 480 宽的一段。人物站在 y = 234 这条地面线上。
 
@@ -27,7 +27,7 @@ npm run build    # 输出 dist/，Vercel 构建命令同此，输出目录 dist�
 | scene-ward.png | 640×270 | 第三、六章：病房 | 门 28、病床 240 |
 | scene-talkroom.png | 480×270 | 第四章：谈话室 | 门 28、桌椅 300 |
 | scene-icu.png | 640×270 | 第五章：ICU 床旁 | 门 28、病床 240 |
-| sprite-player / senior / patient / family / nurse .png | 32×64 | 场景里的人物小人（4 头身） | 脚踩图片底边，面朝右画；玩家向左走时自动翻转 |
+| sprite-player / senior / patient / family / nurse .png | 48×96 | 场景里的人物小人（约 4 头身） | 脚踩图片底边，面朝右画；玩家向左走时自动翻转 |
 | portrait-senior / liu / patient / family / nurse / hema / icu / gi / ob / rheum .png | 96×128 | 对话头像 | |
 
 物件的点击区域大约是：HIS 电脑 48×40，门 36×92，白板 110×64，其余 36×30。放入背景图后，这些占位色块变成透明，只留名字标签。画面里物件的位置和上表对不上时，改 `src/data/chapters/` 里对应条目的 `x` 即可。

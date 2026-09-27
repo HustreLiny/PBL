@@ -13,8 +13,8 @@ import { Whiteboard } from './Whiteboard';
 const SPEED = 170;
 /** 玩家与人物或物件之间可以交互的空隙 */
 const REACH = 14;
-const PLAYER: [number, number] = [32, 64];
-const EDGE = 16;
+const PLAYER: [number, number] = [48, 96];
+const EDGE = PLAYER[0] / 2;
 
 /** 人物和物件的尺寸（原始像素）；人物为 4 头身像素小人 */
 function sizeOf(h: Hotspot): [number, number] {

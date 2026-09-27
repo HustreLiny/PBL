@@ -1,6 +1,6 @@
 // 自动检查共用的小工具
 
-/** 记录脚本错误和失败的请求；美术图还没做，/art/ 下的 404 不算 */
+/** 记录脚本错误和失败的请求，包括已接入的美术素材 */
 export function watch(page) {
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
@@ -8,7 +8,7 @@ export function watch(page) {
     if (m.type() === 'error' && !m.text().startsWith('Failed to load resource')) errors.push(m.text());
   });
   page.on('response', (r) => {
-    if (r.status() >= 400 && !new URL(r.url()).pathname.startsWith('/art/')) errors.push(`${r.status()} ${r.url()}`);
+    if (r.status() >= 400) errors.push(`${r.status()} ${r.url()}`);
   });
   return errors;
 }
