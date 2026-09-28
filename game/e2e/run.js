@@ -4,8 +4,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { preview } from 'vite';
-import { chromium } from 'playwright-core';
-import { advance, newGame, settle, walk, watch } from './util.js';
+import { advance, launch, newGame, settle, walk, watch } from './util.js';
 import { ROUTES, playRoute } from './play.js';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
@@ -15,18 +14,6 @@ const failures = [];
 function check(ok, name, detail = '') {
   console.log(`${ok ? '✓' : '✗'} ${name}${!ok && detail ? `\n    ${detail}` : ''}`);
   if (!ok) failures.push(name);
-}
-
-async function launch() {
-  if (process.env.CHROME_PATH) return chromium.launch({ executablePath: process.env.CHROME_PATH });
-  for (const channel of ['chrome', 'msedge']) {
-    try {
-      return await chromium.launch({ channel });
-    } catch {
-      /* 换下一个 */
-    }
-  }
-  throw new Error('找不到 Chrome 或 Edge，可以用 CHROME_PATH 指定浏览器路径。');
 }
 
 /** 标题页、关于、审阅入口、手机提示、出错页 */

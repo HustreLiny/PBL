@@ -1,4 +1,18 @@
-// 自动检查共用的小工具
+// 自动检查共用的小工具（宣传片录制 promo/record.js 也用）
+import { chromium } from 'playwright-core';
+
+/** 用本机的 Chrome，没有就用 Edge；也可以用 CHROME_PATH 指定浏览器路径 */
+export async function launch() {
+  if (process.env.CHROME_PATH) return chromium.launch({ executablePath: process.env.CHROME_PATH });
+  for (const channel of ['chrome', 'msedge']) {
+    try {
+      return await chromium.launch({ channel });
+    } catch {
+      /* 换下一个 */
+    }
+  }
+  throw new Error('找不到 Chrome 或 Edge，可以用 CHROME_PATH 指定浏览器路径。');
+}
 
 /** 记录脚本错误和失败的请求，包括已接入的美术素材 */
 export function watch(page) {

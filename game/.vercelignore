@@ -1,0 +1,10 @@
+# Only upload the Vite app and assets needed to build it.
+/*
+!index.html
+!package.json
+!package-lock.json
+!tsconfig.json
+!vite.config.ts
+!src
+!public
+src/**/*.test.ts

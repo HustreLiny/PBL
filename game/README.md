@@ -8,6 +8,7 @@ npm run dev      # 本地开发
 npm test         # 判定规则与章节数据测试
 npm run e2e      # 构建后自动检查界面、7 种屏幕尺寸、平板触屏，以及好、中、坏三条通关路线（约一分钟，需要本机装有 Chrome 或 Edge）
 npm run build    # 输出 dist/，Vercel 构建命令同此，输出目录 dist，根目录设为 game
+npm run promo    # 构建后录制 56 秒宣传片和封面，输出到 promo/out/（约两分钟，需要 Chrome 或 Edge 和 ffmpeg）
 ```
 
 审阅时在网址后加 `?review`（例如 `https://你的网址/?review`），标题页才会出现“审阅用：从某一章开始”，可以直接跳到任一章。玩家打开普通网址看不到这个入口。各章答案见 `审阅用-全章答案.md`。
@@ -47,9 +48,14 @@ npm run build    # 输出 dist/，Vercel 构建命令同此，输出目录 dist�
 
 ## 发布与维护
 
+### 最小文件部署到 Vercel
+
+在 `game/` 目录运行 `npm run build` 确认构建通过，再运行 `vercel deploy --prod`（首次使用需先安装并登录 Vercel CLI）。项目设置选择 Vite；若要求手动填写，构建命令为 `npm run build`，输出目录为 `dist`。`game/.vercelignore` 只上传构建所需的源码、配置和 `public/` 素材，不上传上级目录中的 PBL 资料、设计稿或测试文件。首次部署会要求关联或新建 Vercel 项目，之后仍在 `game/` 目录运行同一命令更新网站。
+
 - **版本号**：只改 `package.json` 的 `version`，“关于”页会自动显示。
 - **存档**：存在玩家浏览器本地，键名是 `src/state.ts` 里的 `SAVE_KEY`。改了剧本或数据、旧存档可能对不上时，换一个键名，旧存档就不再读取。
 - **出错页**：画面出错时不会白屏，玩家可以重新载入、回到本章开头，或清除存档从头开始。
 - **美术署名**：换上正式美术后，改 `src/components/About.tsx` 顶部的 `ART_CREDIT`。
 - **字体许可**：两种字体都是 SIL OFL 1.1，许可文本在 `public/fonts/`，“关于”页有链接。
 - **自动检查**：`e2e/play.js` 的三条路线按 `审阅用-全章答案.md` 作答。改了卡名、条目数值或判定规则，要同步改这里的答案，再跑 `npm run e2e`。
+- **宣传片**：`npm run promo` 用审阅入口直接跳到各章，逐帧录下真实的游戏操作，配乐和音效都由代码合成，不用外部音频。输出 `promo/out/妊娠黄疸-宣传片.mp4`（1920×1080，56 秒）和 `poster.png`（片名画面，可作封面）。上线后加网址重录，片尾会显示网址：`npm run promo -- --url=https://你的网址`。字幕和片头文字在 `promo/record.js` 的 `CFG`，要拍的操作在 `promo/shots.js`。改了界面或剧本后重录一次，镜头超时或点不到按钮会在最后提示。
