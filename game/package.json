@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "e2e": "npm run build && node e2e/run.js"
+    "e2e": "npm run build && node e2e/run.js",
+    "promo": "npm run build && node promo/record.js"
   },
   "dependencies": {
     "lxgw-wenkai-screen-webfont": "^1.7.0",

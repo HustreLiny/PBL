@@ -8,6 +8,7 @@ npm run dev      # 本地开发
 npm test         # 判定规则与章节数据测试
 npm run e2e      # 构建后自动检查界面、7 种屏幕尺寸、平板触屏，以及好、中、坏三条通关路线（约一分钟，需要本机装有 Chrome 或 Edge）
 npm run build    # 输出 dist/，Vercel 构建命令同此，输出目录 dist，根目录设为 game
+npm run promo    # 构建后录制 64 秒宣传片与封面，需要 Chrome 或 Edge 和 ffmpeg
 ```
 
 审阅时在网址后加 `?review`（例如 `https://你的网址/?review`），标题页才会出现“审阅用：从某一章开始”，可以直接跳到任一章。玩家打开普通网址看不到这个入口。各章答案见 `审阅用-全章答案.md`。
@@ -53,3 +54,5 @@ npm run build    # 输出 dist/，Vercel 构建命令同此，输出目录 dist�
 - **美术署名**：换上正式美术后，改 `src/components/About.tsx` 顶部的 `ART_CREDIT`。
 - **字体许可**：两种字体都是 SIL OFL 1.1，许可文本在 `public/fonts/`，“关于”页有链接。
 - **自动检查**：`e2e/play.js` 的三条路线按 `审阅用-全章答案.md` 作答。改了卡名、条目数值或判定规则，要同步改这里的答案，再跑 `npm run e2e`。
+- **BGM**：Suno 提示词、文件名和放置方式见 `public/audio/SUNO-BGM提示词.md`。游戏音乐由玩家在右上角主动开启；宣传片录制会自动使用 `public/audio/promo-bgm.mp3`，缺失时回退到内置合成配乐。
+- **宣传片**：`npm run promo` 逐帧录下真实游戏操作，输出到 `promo/out/`。片尾需要网址时运行 `npm run promo -- --url=https://你的网址`；临时指定配乐可加 `--bgm=音频路径`。

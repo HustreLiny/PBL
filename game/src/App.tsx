@@ -13,6 +13,7 @@ import { ChapterEnd, Ending, Reveal } from './components/Settle';
 import { Help } from './components/Help';
 import { About } from './components/About';
 import { SmallScreen } from './components/SmallScreen';
+import { BgmControl } from './components/BgmControl';
 
 /** 审阅入口只在网址带 ?review 时出现，玩家看不到 */
 const REVIEW = new URLSearchParams(location.search).has('review');
@@ -77,31 +78,34 @@ export default function App() {
       <div className="app">
         <header className="topbar">
           <span className="pixel">妊娠黄疸 PBL{s.phase !== 'title' && ` · ${ch.no} · ${ch.title}`}</span>
-          {s.phase !== 'title' && (
-            <span className="row" style={{ marginTop: 0 }}>
-              <button className="small" onClick={() => d({ t: 'help', on: true })}>
-                操作说明
-              </button>
-              {s.phase !== 'ending' && (
+          <span className="row" style={{ marginTop: 0 }}>
+            <BgmControl />
+            {s.phase !== 'title' && (
+              <>
+                <button className="small" onClick={() => d({ t: 'help', on: true })}>
+                  操作说明
+                </button>
+                {s.phase !== 'ending' && (
+                  <button
+                    className="small"
+                    onClick={() => {
+                      if (confirm('重来本章？本章进度会回到章节开头。')) d({ t: 'restartChapter' });
+                    }}
+                  >
+                    重来本章
+                  </button>
+                )}
                 <button
                   className="small"
                   onClick={() => {
-                    if (confirm('重来本章？本章进度会回到章节开头。')) d({ t: 'restartChapter' });
+                    if (confirm('回到标题？当前存档会清空。')) d({ t: 'reset' });
                   }}
                 >
-                  重来本章
+                  回到标题
                 </button>
-              )}
-              <button
-                className="small"
-                onClick={() => {
-                  if (confirm('回到标题？当前存档会清空。')) d({ t: 'reset' });
-                }}
-              >
-                回到标题
-              </button>
-            </span>
-          )}
+              </>
+            )}
+          </span>
         </header>
         <main className={withTools ? 'layout with-tools' : 'layout'}>
           <div className="stage">
