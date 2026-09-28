@@ -23,6 +23,8 @@ async function shell(browser, url) {
   await p.goto(url);
   await p.evaluate(() => localStorage.clear());
   await p.reload();
+  const titleCopy = await p.locator('.title-screen').innerText();
+  check(!titleCopy.includes('中档'), '标题页不显示内部难度标记', titleCopy);
   check((await p.locator('.review-box').count()) === 0, '标题页不显示审阅入口');
   await p.getByRole('button', { name: '关于' }).click();
   const about = await p.locator('.about').innerText();
@@ -43,6 +45,9 @@ async function shell(browser, url) {
   // 存档坏了：出错页可以回到本章开头，也可以清除存档
   const c = await browser.newPage({ viewport: { width: 1366, height: 768 } });
   await newGame(c, url);
+  await c.getByRole('button', { name: '知识库' }).click();
+  const knowledge = await c.locator('.tool-body').innerText();
+  check(!/K\d{2}|见设计稿|待带教人员审核|参考：M\d/.test(knowledge), '知识库不显示内部编号、来源或审核备注', knowledge);
   const key = await c.evaluate(() => Object.keys(localStorage).find((k) => k.startsWith('pbl-save')));
   const breakSave = () => c.evaluate((k) => localStorage.setItem(k, JSON.stringify({ ...JSON.parse(localStorage.getItem(k)), chapter: 'zz' })), key);
   await breakSave();

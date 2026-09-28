@@ -292,7 +292,6 @@ textarea.notes { width: 100%; min-height: 300px; border: 2px solid var(--line); 
     repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.06) 0 1px, transparent 1px 80px),
     linear-gradient(to bottom, #7d8190 0 234px, #3f424b 234px 236px, #555964 236px);
 }
-.scene-ph small { position: absolute; left: 6px; top: 4px; font-size: 7px; color: #eee; background: rgba(0, 0, 0, 0.4); padding: 1px 3px; }
 .hs { position: absolute; padding: 0; border: 1px solid var(--line); box-shadow: none; color: #fff; }
 .hs:active { transform: none; }
 .hs:hover, .hs:focus-visible { outline: 1px solid #ffd966; outline-offset: 1px; }

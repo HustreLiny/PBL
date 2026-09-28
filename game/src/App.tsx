@@ -25,7 +25,7 @@ function Title({ onStart }: { onStart: (chapter: ChapterId, suggested: boolean) 
   return (
     <div className="title-screen">
       <h1 className="pixel">妊娠黄疸</h1>
-      <p>PBL 互动推理 · 中档</p>
+      <p>临床互动推理</p>
       <p className="hint-text">病例资料会随病程逐步开放；你可以提出检查建议，并用当前取得的资料推进判断。</p>
       <button className="primary big" onClick={() => onStart('p0', false)}>
         从头开始

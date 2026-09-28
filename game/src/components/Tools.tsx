@@ -131,19 +131,17 @@ function Knowledge() {
       {list.map((k) => (
         <div key={k.id} className="kb">
           <button className="kb-title" onClick={() => setOpen(open === k.id ? null : k.id)}>
-            {k.id} {k.title}
+            {k.title}
           </button>
           {open === k.id && (
             <div className="kb-body">
               {k.body.map((p) => (
                 <p key={p}>{p}</p>
               ))}
-              {k.ref && <small>参考：{k.ref}（见设计稿附录 B）</small>}
             </div>
           )}
         </div>
       ))}
-      <p className="hint-text">知识库内容待带教人员审核。</p>
     </div>
   );
 }
