@@ -11,7 +11,7 @@ npm run build    # 输出 dist/，Vercel 构建命令同此，输出目录 dist�
 npm run promo    # 构建后录制 64 秒宣传片与封面，输出到 promo/out/（需要 Chrome 或 Edge 和 ffmpeg）
 ```
 
-审阅时在网址后加 `?review`（例如 `https://你的网址/?review`），标题页才会出现“审阅用：从某一章开始”，可以直接跳到任一章。玩家打开普通网址看不到这个入口。各章答案见 `审阅用-全章答案.md`。
+审阅时在网址后加 `?review`（例如 `https://你的网址/?review`），标题页会出现“审阅用：从某一章开始”，可以直接跳到任一章。玩家打开普通网址看不到这个入口。各章答案见 `审阅用-全章答案.md`。
 
 ## 美术替换
 
@@ -60,3 +60,6 @@ npm run promo    # 构建后录制 64 秒宣传片与封面，输出到 promo/ou
 - **自动检查**：`e2e/play.js` 的三条路线按 `审阅用-全章答案.md` 作答。改了卡名、条目数值或判定规则，要同步改这里的答案，再跑 `npm run e2e`。
 - **BGM**：Suno 提示词、文件名和放置方式见 `public/audio/SUNO-BGM提示词.md`。游戏音乐由玩家在右上角主动开启；宣传片录制会自动使用 `public/audio/promo-bgm.mp3`，缺失时回退到内置合成配乐。
 - **宣传片**：`npm run promo` 用审阅入口逐帧录下真实游戏操作，输出 `promo/out/妊娠黄疸-宣传片.mp4`（1920×1080，64 秒）和 `poster.png`（片名画面，可作封面）。片尾需要网址时运行 `npm run promo -- --url=https://你的网址`；临时指定配乐可加 `--bgm=音频路径`。字幕和片头文字在 `promo/record.js` 的 `CFG`，要拍的操作在 `promo/shots.js`。改了界面或剧本后重录一次，镜头超时或点不到按钮会在最后提示。
+
+# 授权
+保留所有权利。
