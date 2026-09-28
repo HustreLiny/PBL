@@ -32,10 +32,7 @@ export function Art({ slot, label, kind, scale = kind === 'scene' ? 2 : 1, mood 
   return (
     <div className={`art placeholder ${kind}`} style={style} role="img" aria-label={label}>
       <span className="pixel">{label}</span>
-      <small>
-        {slot}.png · {w}×{h}
-      </small>
-      {mood && <small className="mood">表情：{mood}</small>}
+      {mood && <small className="mood">{mood}</small>}
     </div>
   );
 }

@@ -302,7 +302,7 @@ export const C4: ChapterDef = {
   reveal: {
     title: 'ERCP 记录',
     items: E19_ITEMS,
-    note: '以上为原病例的操作记录。黑胆汁不等于已经证实的结石成分。',
+    note: '以上为本次 ERCP 的操作记录。黑胆汁不等于已经证实的结石成分。',
     next: 'chapterEnd',
   },
   core: ['E16.1', ...E19_ITEMS.map((i) => i.id)],

@@ -4,6 +4,7 @@ export interface KnowledgeEntry {
   title: string;
   tags: string[];
   body: string[];
+  /** 维护与医学复核使用，不向玩家展示。 */
   ref?: string;
 }
 

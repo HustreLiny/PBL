@@ -112,13 +112,12 @@ export function Ending() {
           </small>
         </div>
       </div>
-      <h3 className="pixel">原病例后记</h3>
+      <h3 className="pixel">病程后记</h3>
       <ul>
         {E32_ITEMS.map((i) => (
           <li key={i.id}>{i.value}</li>
         ))}
       </ul>
-      <p className="hint-text">后记是原病例的真实经过，不因你的选择而改变。</p>
       <h3 className="pixel">复盘</h3>
       <ul>
         <li>汇报提交次数：{attempts}</li>

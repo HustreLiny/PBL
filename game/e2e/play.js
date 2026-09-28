@@ -12,7 +12,7 @@ const V = {
   'E19.1': '见黑胆汁', 'E19.2': '胆管下段狭窄，可疑小充盈缺损',
   'E20.TBil': '180.2 μmol/L', 'E21.HGB': '60 g/L', 'E21.PLT': '约 20 ×10⁹/L', 'E23.Smear': '大量破碎红细胞', 'E23.Ret': '10%',
   'E24.1': '<5%', 'E24.2': '阳性', 'E25.2': '前两次分别在孕 7、8 周自然流产', 'E26.2': '日晒后红斑发痒',
-  'E27.1': '1:1280', 'E28.1': '2.2（原参考 <1.2）',
+  'E27.1': '1:1280', 'E28.1': '2.2（参考范围 <1.2）',
 };
 
 const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -276,7 +276,7 @@ export async function playRoute(browser, url, route) {
     await p.getByRole('button', { name: '确定方案' }).click();
     await adv();
     await talk(route.talk5, 7);
-    await reveal('原病例回报');
+    await reveal('检验结果回报');
     await chapterEnd('第五章 · 退潮');
 
     step = '第六章';
@@ -287,7 +287,7 @@ export async function playRoute(browser, url, route) {
       [['SLE 背景与 iTTP：支持相关', ['E27.1', 'E24.2']], ['溶血→色素结石→梗阻：可能机制，未证实', ['E19.1']], ['LA 阳性＋妊娠丢失→APS：值得评估', ['E28.1', 'E25.2']]],
       [['胆管狭窄／梗阻的病因'], ['抗磷脂抗体是否持续阳性']],
     ]);
-    await reveal('会诊意见与原病例后记');
+    await reveal('会诊意见与病程后记');
 
     step = '结局';
     const text = await p.locator('.settle').innerText();

@@ -53,13 +53,7 @@ function SceneBg({ scene }: { scene: SceneDef }) {
   const style = { width: scene.width, height: VIEW_H };
   if (!failed)
     return <img className="scene-bg pixelated" src={`/art/${scene.art}.png`} alt="" style={style} onError={() => setFailed(true)} />;
-  return (
-    <div className="scene-bg scene-ph" style={style}>
-      <small>
-        {scene.art}.png · {scene.width}×{VIEW_H}
-      </small>
-    </div>
-  );
+  return <div className="scene-bg scene-ph" style={style} />;
 }
 
 function His({ onClose }: { onClose: () => void }) {

@@ -138,7 +138,7 @@ export const C6: ChapterDef = {
           { cards: ['所有问题都已解决'], text: ['真的都解决了？', '胆道和免疫这两条线，还有没证实的地方。'] },
           {
             cards: ['补体未活化，可排除补体介导 TMA'],
-            text: ['补体的资料能这么用吗？', '原文没给项目和数值，C3/C4 又记显著减低，不能据此绝对排除。'],
+            text: ['补体的资料能这么用吗？', '现有报告没给项目和数值，C3/C4 又记显著减低，不能据此绝对排除。'],
           },
         ],
         need: [
@@ -189,9 +189,9 @@ export const C6: ChapterDef = {
     collect: [...E31_ITEMS, ...E32_ITEMS].map((i) => i.id),
   },
   reveal: {
-    title: '会诊意见与原病例后记',
+    title: '会诊意见与病程后记',
     items: [...E31_ITEMS, ...E32_ITEMS],
-    note: '以上是原病例记载的会诊意见与后记，不因你的选择而改变。',
+    note: '以上为会诊意见与随访记录。',
     next: 'ending',
   },
   core: [],

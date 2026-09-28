@@ -62,9 +62,9 @@ export const C5: ChapterDef = {
     finish: () => ({ lines: REVEAL_LINES, next: 'reveal', collect: E24_ITEMS.map((i) => i.id) }),
   },
   reveal: {
-    title: '原病例回报',
+    title: '检验结果回报',
     items: E24_ITEMS,
-    note: '这份结果在救治启动之后才回来。高度怀疑时先取样、救治不等结果，这是本章想让你体会的原则。',
+    note: '这份结果在救治启动之后才回来。高度怀疑时先取样，救治不等结果。',
     next: 'chapterEnd',
   },
   crashCorrection: CRASH_CORRECTION,
