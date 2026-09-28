@@ -30,12 +30,12 @@ const addItems = (s, ids) => {
 const claim = (key, card, evidence) => ({ key, card, evidence, timing: null });
 
 export const SHOTS = {
-  // 第一章床旁：走到家属身边，问话，点取黄底信息
-  explore: {
+  // 第一步，问诊：走到家属身边，主动选择问题，看到原始叙述
+  consult: {
     setup: (page, url) => startAt(page, url, 'c1'),
     async run(d, p) {
       d.keys(['←', '→', '回车']);
-      d.caption('左右走动，走近人物就能交谈');
+      d.caption('01  问诊：走近患者、家属与医护人员');
       await d.wait(0.3);
       await d.walk('ArrowLeft', '←', (x) => x <= 352);
       await d.wait(0.2);
@@ -44,36 +44,56 @@ export const SHOTS = {
       await d.wait(0.35);
       await d.click(p.locator('.scene-panel .option', { hasText: '问家属路上的情况' }), { after: 0.3 });
       d.keys([]);
-      d.caption('黄底的话，点一下收进信息板');
-      await d.wait(0.4);
-      await d.click(p.locator('.info-line'), { sfx: 'collect', after: 0.15 });
-      const item = p.locator('.tools .item', { hasText: 'Tmax 39' });
-      await d.reveal(item);
-      await d.highlight(item);
-      await d.wait(0.8);
-      d.unhighlight();
-      await d.click(p.locator('.dialog-layer'), { at: [0.5, 0.12] });
+      await d.highlight(p.locator('.dialog-body'));
+      await d.wait(1.0);
     },
   },
 
-  // 第二章 HIS：检验单打着码，一行行点开
-  his: {
+  // 第二步，收数据：HIS 的结果逐行查看，查看后进入信息板
+  collect: {
     async setup(page, url) {
       await startAt(page, url, 'c2');
       await walk(page, 'HIS 电脑');
     },
     async run(d, p) {
       d.keys([]);
-      d.caption('检验单先打码，点开哪行看哪行');
+      d.caption('02  收数据：从对话、查体和 HIS 提取原始信息');
       await d.wait(0.2);
       await d.click(p.locator('.his-entry', { hasText: '急诊血常规' }), { sfx: 'open', after: 0.25 });
       for (const name of ['HGB', 'PLT'])
         await d.click(p.locator('tr.masked-row', { hasText: name }), { dur: 0.35, sfx: 'reveal', after: 0.15 });
       await d.highlight(p.locator('.his-sheet tr', { hasText: 'PLT' }));
+      await d.wait(0.45);
+      d.unhighlight();
+      await d.highlight(p.locator('.tools'));
+      await d.wait(0.65);
     },
   },
 
-  // 第一章汇报：立论点、挂论据，交给上级；上级标出错的那张卡
+  // 第三步，记笔记分析：把取得的数据整理成自己的问题表征
+  notes: {
+    async setup(page, url) {
+      await startAt(page, url, 'c2');
+      await patchSave(page, (s) => {
+        s.phase = 'explore';
+        addItems(s, ['E03.1', 'E03.3', 'E05.2', 'E08.1', 'E08.2', 'E09.1', 'E12.2']);
+        s.openedReports = [...new Set([...s.openedReports, 'R-E08', 'R-E09', 'R-E12'])];
+        s.notes = '';
+      });
+    },
+    async run(d, p) {
+      d.keys([]);
+      d.caption('03  记笔记分析：把散点信息组织成判断');
+      await d.wait(0.2);
+      await d.click(p.getByRole('button', { name: '笔记', exact: true }), { after: 0.2 });
+      const notes = p.locator('textarea.notes');
+      await d.type(notes, '黄疸 + 发热寒战 + 出血\nPLT 18↓：不能只用胆道梗阻解释', { interval: 0.052 });
+      await d.highlight(notes);
+      await d.wait(0.65);
+    },
+  },
+
+  // 第四步，提交报告：立论点、挂论据并交给上级
   report: {
     async setup(page, url) {
       await startAt(page, url, 'c1');
@@ -83,7 +103,6 @@ export const SHOTS = {
         s.answers = {
           ...s.answers,
           'Q1.1': [
-            claim('m', 'Murphy 征阳性', ['E06.1']),
             claim('f', '发热伴寒战', ['E03.3']),
             claim('p', '右上腹痛', ['E03.2']),
             claim('b', '皮肤黏膜出血', ['E05.2']),
@@ -93,7 +112,7 @@ export const SHOTS = {
     },
     async run(d, p) {
       d.keys([]);
-      d.caption('每张卡是一个论点，从信息板挑论据');
+      d.caption('04  提交报告：一张卡一个论点，再挂上论据');
       await d.wait(0.3);
       await d.click(p.locator('.claim-new'), { sfx: 'open', after: 0.25 });
       await d.click(p.locator('.tray .concept', { hasText: /^黄疸进行性加深$/ }), { sfx: 'pop', after: 0.3 });
@@ -102,28 +121,15 @@ export const SHOTS = {
       await d.click(p.locator('.tools .item', { hasText: '较前加深' }), { sfx: 'pop', after: 0.3 });
       await d.click(card.locator('.slip-add'), { after: 0.2 });
       await d.click(p.getByRole('button', { name: '交给上级' }));
-      d.sfx('wrong', d.t + 0.1);
-      d.caption('哪条有问题，上级医师会标出来');
-      await d.wait(0.3);
-      await d.highlight(p.locator('.claim-card.marked'));
-    },
-  },
-
-  // 接着上一个镜头：删掉错卡再交，这一题过关
-  fix: {
-    async run(d, p) {
-      d.unhighlight();
-      d.caption('改好再交，一题一题过关');
-      await d.click(p.getByRole('button', { name: '回去修改' }), { after: 0.2 });
-      await d.click(p.locator('.claim-card.marked').getByRole('button', { name: '删除' }), { after: 0.3 });
-      await d.click(p.getByRole('button', { name: '交给上级' }));
       d.sfx('collect', d.t + 0.1);
+      d.caption('上级只看你的论点，和它背后的原始依据');
       await d.wait(0.3);
       await d.highlight(p.locator('.opinion'));
+      await d.wait(0.9);
     },
   },
 
-  // 第四章谈话：同一件事，换一种说法
+  // 沟通不是旁支：同一件事的说法会影响患者与家属的回应
   talk: {
     async setup(page, url) {
       await startAt(page, url, 'c4');
@@ -136,13 +142,12 @@ export const SHOTS = {
     },
     async run(d, p) {
       d.keys([]);
-      d.caption('同样的话，换一种说法，结果就不一样');
-      await d.wait(0.5);
+      d.caption('沟通：同一件事，怎么说也会改变结果');
+      await d.wait(0.2);
       const opts = p.locator('.talk .option');
-      await d.hover(opts.nth(1), { dur: 0.5, stay: 0.5 });
-      await d.hover(opts.nth(2), { dur: 0.3, stay: 0.4 });
-      await d.click(opts.nth(0), { after: 1.4 });
-      await d.click(p.locator('.dialog-layer'), { at: [0.5, 0.15] });
+      await d.hover(opts.nth(1), { dur: 0.35, stay: 0.3 });
+      await d.click(opts.nth(0), { dur: 0.35, after: 0.8 });
+      await d.click(p.locator('.dialog-layer'), { dur: 0.3, at: [0.5, 0.15] });
     },
   },
 };

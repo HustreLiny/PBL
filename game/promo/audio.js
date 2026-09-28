@@ -1,5 +1,5 @@
-// 宣传片配乐与音效：全部用代码合成的 8-bit 风格声音，不使用外部音频素材。
-// 120 BPM，一小节 2 秒；各段落的起点和 record.js 里的分段对齐。
+// 宣传片的合成音效，以及 Suno BGM 尚未放入时使用的 8-bit 风格后备配乐。
+// 120 BPM，一小节 2 秒；64 秒共 32 小节，段落跟 record.js 的镜头节奏对齐。
 
 const SR = 48000;
 const E8 = 0.25;
@@ -141,10 +141,14 @@ const BARS = [
   { sec: 'full', ch: 'Am', crash: true, mel: MOTIF_1 },
   { sec: 'full', ch: 'F', mel: MOTIF_2 },
   { sec: 'full', ch: 'G', mel: [[71, 2], [74, 2], [79, 4]] },
-  { sec: 'half', ch: 'Dm', mel: [[77, 2], [76, 2], [74, 2], [69, 2]] },
-  { sec: 'half', ch: 'E', mel: [[68, 4], [71, 4]] },
+  { sec: 'full', ch: 'Dm', mel: [[77, 2], [76, 2], [74, 2], [69, 2]] },
+  { sec: 'full', ch: 'E', mel: [[68, 4], [71, 4]] },
+  { sec: 'full', ch: 'Am', mel: MOTIF_1 },
+  { sec: 'full', ch: 'F', mel: MOTIF_2 },
+  { sec: 'build', ch: 'E', mel: [[76, 2], [74, 2], [72, 2], [71, 2]] },
   { sec: 'end', ch: 'A', crash: true, mel: [[73, 4], [76, 4]] },
   { sec: 'end', ch: 'A', mel: [[81, 8]] },
+  { sec: 'end', ch: 'A', mel: [[76, 4], [73, 4]] },
   { sec: 'tail', ch: 'A' },
 ];
 

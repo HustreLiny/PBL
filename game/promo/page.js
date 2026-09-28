@@ -222,6 +222,42 @@
       },
     },
 
+    workflow: {
+      build(root, cfg) {
+        root.style.background = NAVY;
+        const kicker = el('div', centered(72, { ...font(24), color: GOLD, letterSpacing: '8px' }), cfg.kicker);
+        const head = el('div', centered(116, { ...font(52), color: CREAM, textShadow: `0 5px 0 ${INK}` }), cfg.title);
+        const cards = cfg.steps.map((step, i) => {
+          const left = 92 + i * 288;
+          const card = el('div', abs({
+            left: `${left}px`, top: '270px', width: '232px', height: '164px', background: '#fffaf0', color: NAVY,
+            border: `4px solid ${INK}`, boxShadow: `8px 8px 0 ${INK}`, display: 'flex', flexDirection: 'column',
+            alignItems: 'center', justifyContent: 'center', gap: '12px',
+          }));
+          card.append(
+            el('div', { ...font(24), color: '#3f7f6e' }, `0${i + 1}`),
+            el('div', { ...font(36) }, step),
+          );
+          root.append(card);
+          if (i < cfg.steps.length - 1) root.append(el('div', abs({ left: `${left + 246}px`, top: '322px', ...font(48), color: GOLD }), '→'));
+          return card;
+        });
+        const line = el('div', centered(520, { ...font(28), color: '#c9c3b5' }), cfg.line);
+        root.append(kicker, head, line);
+        return { kicker, head, cards, line };
+      },
+      update(r, t) {
+        r.kicker.style.opacity = String(clamp01(t / 0.2));
+        r.head.style.opacity = String(clamp01((t - 0.15) / 0.25));
+        r.cards.forEach((card, i) => {
+          const k = easeOut((t - 0.45 - i * 0.28) / 0.18);
+          card.style.opacity = String(k);
+          card.style.transform = `translateY(${snap(20 * (1 - k))}px)`;
+        });
+        r.line.style.opacity = String(clamp01((t - 1.65) / 0.25));
+      },
+    },
+
     mdt: {
       build(root, cfg) {
         root.style.background = NAVY;

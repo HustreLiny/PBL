@@ -148,6 +148,18 @@ export class Director {
     if (after) await this.wait(after);
   }
 
+  /** 在输入框里逐字输入；用 insertText 保证中文不依赖本机输入法 */
+  async type(loc, text, { interval = 0.065, sfx = 'type' } = {}) {
+    await loc.waitFor({ state: 'visible', timeout: 5000 });
+    await this.reveal(loc);
+    await loc.focus();
+    for (const ch of text) {
+      await this.page.keyboard.insertText(ch);
+      if (ch.trim() && sfx) this.sfx(sfx);
+      await this.wait(interval);
+    }
+  }
+
   /** 光标悬停在元素上一会儿 */
   async hover(loc, { dur = 0.45, stay = 0.4, at } = {}) {
     const [x, y] = await this.point(loc, at);
